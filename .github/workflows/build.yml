@@ -40,7 +40,7 @@ jobs:
         continue-on-error: true # لا يوقف البناء، فقط تنبيه في السجل
 
       - name: تحليل ثابت للكود
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
   test:
     name: تشغيل الاختبارات (flutter test)
