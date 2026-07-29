@@ -36,3 +36,8 @@ functions/.env
 
 # Coverage
 coverage/
+
+# ملفات مولَّدة تلقائياً (flutter gen-l10n) — تُعاد توليدها في كل بناء
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_*.dart
+

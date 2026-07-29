@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../domain/category.dart';
 import '../domain/product.dart';
