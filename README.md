@@ -12,8 +12,16 @@
 ```bash
 flutter --version   # تأكد أن لديك Flutter 3.22+ / Dart 3.3+
 flutter create --platforms=android --org com.matajirna .   # يولّد مجلد android/ رسمياً (غير مرفوع في المستودع عمداً)
-sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 30/' android/app/build.gradle.kts
-sed -i 's/android:label="mataajirna"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
+
+# تخصيص minSdk=30 واسم التطبيق — يتكيف تلقائياً سواء كانت نسختك تولّد
+# build.gradle (Groovy) أو build.gradle.kts (Kotlin DSL):
+if [ -f android/app/build.gradle.kts ]; then
+  sed -i '/defaultConfig {/a\        minSdk = 30' android/app/build.gradle.kts
+else
+  sed -i '/defaultConfig {/a\        minSdkVersion 30' android/app/build.gradle
+fi
+sed -i 's/android:label="[^"]*"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
+
 flutter pub get
 flutter gen-l10n    # يولّد lib/l10n/app_localizations.dart من ملفات .arb
 flutter analyze     # تحقق من عدم وجود أخطاء قبل التشغيل

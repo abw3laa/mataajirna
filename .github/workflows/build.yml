@@ -102,10 +102,22 @@ jobs:
 
       - name: تخصيص إعدادات Android (minSdk 30 لأندرويد 11+، اسم التطبيق بالعربية)
         run: |
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 30/' android/app/build.gradle.kts
-          sed -i 's/android:label="mataajirna"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
-          grep -n "minSdk = 30" android/app/build.gradle.kts
-          grep -n 'android:label="متجرنا"' android/app/src/main/AndroidManifest.xml
+          set -e
+          # نسخة Flutter المستخدمة قد تولّد Gradle بصيغة Groovy (build.gradle)
+          # أو Kotlin DSL (build.gradle.kts) حسب الإصدار — نتعامل مع الحالتين.
+          if [ -f android/app/build.gradle.kts ]; then
+            GRADLE_FILE=android/app/build.gradle.kts
+            sed -i '/defaultConfig {/a\        minSdk = 30' "$GRADLE_FILE"
+          else
+            GRADLE_FILE=android/app/build.gradle
+            sed -i '/defaultConfig {/a\        minSdkVersion 30' "$GRADLE_FILE"
+          fi
+          echo "== $GRADLE_FILE =="
+          cat "$GRADLE_FILE"
+
+          sed -i 's/android:label="[^"]*"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
+          echo "== AndroidManifest.xml =="
+          cat android/app/src/main/AndroidManifest.xml
 
       # ⚠️ ملاحظة: إن ربطت Firebase لاحقاً، يجب رفع google-services.json كسرّ
       # (Secret) في المستودع وكتابته هنا قبل خطوة البناء، مثال:
