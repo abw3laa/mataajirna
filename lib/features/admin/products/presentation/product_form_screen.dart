@@ -103,7 +103,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     const SizedBox(height: 8),
                     categoriesAsync.when(
                       data: (categories) => DropdownButtonFormField<String>(
-                        initialValue: _categoryId,
+                        value: _categoryId,
                         hint: Text(t.selectCategory),
                         items: [
                           for (final c in categories)
