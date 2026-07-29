@@ -11,15 +11,21 @@
 
 ```bash
 flutter --version   # تأكد أن لديك Flutter 3.22+ / Dart 3.3+
-flutter create .    # يُكمل أي ملفات منصّة ناقصة (iOS مثلاً) بدون المساس بـ lib/ أو pubspec.yaml
+flutter create --platforms=android --org com.matajirna .   # يولّد مجلد android/ رسمياً (غير مرفوع في المستودع عمداً)
+sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 30/' android/app/build.gradle.kts
+sed -i 's/android:label="mataajirna"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
 flutter pub get
 flutter gen-l10n    # يولّد lib/l10n/app_localizations.dart من ملفات .arb
 flutter analyze     # تحقق من عدم وجود أخطاء قبل التشغيل
 flutter run
 ```
 
-> إن ظهرت أي تحذيرات `analyze` بسيطة (مثل imports غير مستخدمة) بعد التوليد التلقائي،
-> أصلحها حسب رسالة المحلل — الكود لم يُختبر عبر compiler فعلي.
+> **لماذا لا يوجد مجلد `android/` في المستودع؟** كانت نسخة يدوية أولى منه تسبب خطأ
+> `Build failed due to use of deleted Android v1 embedding.` في CI بسبب فرق دقيق في
+> ملفات Gradle/Manifest تعذّر التحقق منه يدوياً بدون تشغيل Flutter SDK فعلياً. الحل
+> الأضمن (المعتمد الآن هنا وفي `build.yml`) هو توليده رسمياً عبر `flutter create` نفسه
+> في كل مرة — مضمون التوافق دائماً مع نسخة Flutter/Gradle/AGP المستخدمة — ثم تخصيصه
+> بالأوامر أعلاه (minSdk 30، اسم التطبيق).
 
 ## بيانات الدخول التجريبية (Mock — بدون Firebase)
 
@@ -99,7 +105,10 @@ firebase/
   حسب اختيار المستخدم؛ أسعار الصرف الحالية في `lib/core/currency/app_currency.dart` **ثابتة
   للتطوير فقط** ويجب ربطها بخدمة أسعار صرف حية قبل الإنتاج.
 
-## رفع أيقونة حقيقية
+## أيقونة التطبيق
 
-الأيقونة الحالية في `android/app/src/main/res/mipmap-*/ic_launcher.png` هي placeholder بسيط
-(دائرة زرقاء). استبدلها بأيقونة رسمية عبر حزمة `flutter_launcher_icons` أو يدوياً.
+بما أن مجلد `android/` يُولَّد الآن تلقائياً عبر `flutter create` (انظر أعلاه)، فإن الأيقونة
+الافتراضية هي أيقونة Flutter القياسية. لإضافة أيقونة رسمية للمتجر، أسهل طريقة هي حزمة
+[`flutter_launcher_icons`](https://pub.dev/packages/flutter_launcher_icons): أضف الحزمة
+والصورة المصدر إلى `pubspec.yaml` ثم شغّل `dart run flutter_launcher_icons` بعد توليد
+مجلد `android/`.

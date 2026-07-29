@@ -10,7 +10,11 @@ build/
 *.iws
 .idea/
 
-# Android
+# مجلد android بالكامل: يُولَّد عبر flutter create (راجع README) ولا يُرفَع للمستودع
+# لضمان توافقه الدائم مع نسخة Flutter/Gradle/AGP المستخدمة عند البناء.
+/android/
+
+# Android (تبقى فعّالة إن قرر أحدهم لاحقاً رفع نسخة مخصّصة من android/)
 android/**/gradle-wrapper.jar
 android/.gradle
 android/captures/

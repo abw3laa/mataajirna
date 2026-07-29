@@ -94,6 +94,19 @@ jobs:
       - name: توليد ملفات الترجمة (l10n)
         run: flutter gen-l10n
 
+      # نولّد مجلد android رسمياً عبر أداة Flutter نفسها (بدل الاحتفاظ بنسخة
+      # يدوية في المستودع) لضمان توافقه التام مع نسخة Flutter/Gradle/AGP
+      # المستخدمة في هذا الـ Runner بالتحديد، ثم نخصّصه بإعداداتنا.
+      - name: توليد مجلد Android عبر Flutter
+        run: flutter create --platforms=android --org com.matajirna .
+
+      - name: تخصيص إعدادات Android (minSdk 30 لأندرويد 11+، اسم التطبيق بالعربية)
+        run: |
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 30/' android/app/build.gradle.kts
+          sed -i 's/android:label="mataajirna"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
+          grep -n "minSdk = 30" android/app/build.gradle.kts
+          grep -n 'android:label="متجرنا"' android/app/src/main/AndroidManifest.xml
+
       # ⚠️ ملاحظة: إن ربطت Firebase لاحقاً، يجب رفع google-services.json كسرّ
       # (Secret) في المستودع وكتابته هنا قبل خطوة البناء، مثال:
       # - name: كتابة google-services.json من الأسرار
