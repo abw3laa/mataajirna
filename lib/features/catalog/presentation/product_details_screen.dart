@@ -27,7 +27,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final productAsync = ref.watch(productDetailsProvider(widget.productId));
     final money = ref.watch(currencyFormatterProvider);
 

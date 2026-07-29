@@ -33,7 +33,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final categoriesAsync = ref.watch(categoriesProvider);
     final isEdit = widget.productId != null;
 

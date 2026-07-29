@@ -16,7 +16,7 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final items = ref.watch(cartProvider);
     final money = ref.watch(currencyFormatterProvider);
     final subtotal = ref.watch(cartSubtotalProvider);

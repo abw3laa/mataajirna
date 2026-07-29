@@ -14,7 +14,7 @@ class OrderDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final ordersAsync = ref.watch(myOrdersProvider);
     final money = ref.watch(currencyFormatterProvider);
 
