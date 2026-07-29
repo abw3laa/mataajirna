@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>متجرنا - التنبيهات</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#006f66",
+                        "on-secondary-fixed": "#00201d",
+                        "on-surface": "#1a1c1d",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#d9e2ff",
+                        "surface-variant": "#e2e2e4",
+                        "on-primary-fixed-variant": "#00429c",
+                        "tertiary-container": "#853100",
+                        "surface-container-low": "#f3f3f5",
+                        "surface-tint": "#2b5bb5",
+                        "tertiary": "#602100",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#006a62",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e2e2e4",
+                        "tertiary-fixed": "#ffdbcd",
+                        "outline": "#737783",
+                        "surface-dim": "#d9dadc",
+                        "on-secondary-fixed-variant": "#005049",
+                        "secondary-container": "#81f3e5",
+                        "inverse-primary": "#b0c6ff",
+                        "primary-container": "#0d47a1",
+                        "on-primary-fixed": "#001945",
+                        "inverse-surface": "#2f3132",
+                        "background": "#f9f9fb",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-container": "#eeeef0",
+                        "on-background": "#1a1c1d",
+                        "surface-bright": "#f9f9fb",
+                        "inverse-on-surface": "#f0f0f2",
+                        "primary": "#003178",
+                        "on-surface-variant": "#434652",
+                        "surface-container-high": "#e8e8ea",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface": "#f9f9fb",
+                        "secondary-fixed-dim": "#66d9cc",
+                        "on-tertiary-container": "#ffa781",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#84f5e8",
+                        "outline-variant": "#c3c6d4",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-primary-container": "#a1bbff",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "on-tertiary-fixed": "#360f00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-tablet": "24px",
+                        "gutter": "16px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["IBM Plex Sans Arabic"],
+                        "headline-sm": ["IBM Plex Sans Arabic"],
+                        "label-md": ["IBM Plex Sans Arabic"],
+                        "headline-md": ["IBM Plex Sans Arabic"],
+                        "label-sm": ["IBM Plex Sans Arabic"],
+                        "body-md": ["IBM Plex Sans Arabic"],
+                        "body-lg": ["IBM Plex Sans Arabic"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["30px", { "lineHeight": "42px", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex flex-col md:flex-row">
+<!-- Sidebar Navigation (Desktop) -->
+<nav class="hidden md:flex h-full w-80 fixed right-0 top-0 bg-surface dark:bg-surface-container-low shadow-2xl flex-col h-full py-6 rtl z-50">
+<div class="px-6 mb-8 flex justify-end items-center">
+<div class="text-right">
+<h2 class="font-headline-md text-headline-md text-primary">مدير النظام</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">admin@store.sa</p>
+</div>
+<img class="w-12 h-12 rounded-full mr-4 object-cover" data-alt="A professional headshot of a Middle Eastern man in a modern office setting, wearing smart casual attire. Soft, natural lighting. Shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYQXHwEx42nIEvAcadmUAldkdjES4zEG-8ILpziXgF1VOV0ujjzjGYYUfXEN7NjCEySW0nFA7eDPqDWzZjLcdYIbTM1BmrJdXiHspzt9AcRqSvBll3EhkHGHzY5Q-i74RyrSCC3qtyhDj3bi5c_mIrI5XUAzZ_XEm9JealIJGA1n5PzqzG6cqynRolSqZyjhlEagsjKlIXIwbkclynz60o9yt_ajOtuljIyeHC-AY8MABzRf_HeP_-"/>
+</div>
+<ul class="flex flex-col gap-2">
+<li>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors mr-4 rounded-l-full" href="#">
+<span class="material-symbols-outlined ml-4">dashboard</span>
+<span class="font-label-md text-label-md">لوحة التحكم</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors mr-4 rounded-l-full" href="#">
+<span class="material-symbols-outlined ml-4">inventory_2</span>
+<span class="font-label-md text-label-md">المنتجات</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors mr-4 rounded-l-full" href="#">
+<span class="material-symbols-outlined ml-4">receipt_long</span>
+<span class="font-label-md text-label-md">الطلبات</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-6 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-l-full mr-4" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="font-label-md text-label-md">التنبيهات</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors mr-4 rounded-l-full mt-auto" href="#">
+<span class="material-symbols-outlined ml-4">settings</span>
+<span class="font-label-md text-label-md">الإعدادات</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors mr-4 rounded-l-full" href="#">
+<span class="material-symbols-outlined ml-4">logout</span>
+<span class="font-label-md text-label-md">تسجيل الخروج</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 w-full md:mr-80 pb-24 md:pb-0 min-h-screen">
+<!-- Top App Bar (Mobile) -->
+<header class="md:hidden sticky top-0 flex flex-row-reverse justify-between items-center px-margin-mobile w-full h-14 z-50 bg-surface dark:bg-surface-dim shadow-sm dark:shadow-none">
+<button class="text-primary dark:text-inverse-primary hover:bg-surface-container-high transition-colors active:scale-95 duration-100 p-2 rounded-full">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">متجرنا</h1>
+<button class="text-primary dark:text-inverse-primary hover:bg-surface-container-high transition-colors active:scale-95 duration-100 p-2 rounded-full">
+<span class="material-symbols-outlined">shopping_bag</span>
+</button>
+</header>
+<!-- Content Canvas -->
+<div class="px-margin-mobile md:px-margin-tablet py-stack-lg max-w-4xl mx-auto">
+<div class="flex justify-between items-center mb-stack-lg">
+<h1 class="font-display-lg text-display-lg text-on-background">التنبيهات</h1>
+<button class="text-primary font-label-md text-label-md hover:underline bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm hover:bg-surface-container-low transition-colors">تحديد الكل كمقروء</button>
+</div>
+<div class="space-y-stack-md relative">
+<!-- Notification Card: Unread -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute right-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex-shrink-0 w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center text-primary mt-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">تم شحن طلبك!</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">منذ ٢ دقيقة</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-2">طلبك رقم #45892 في طريقه إليك. يمكنك تتبع الشحنة من خلال صفحة تفاصيل الطلب.</p>
+<button class="font-label-md text-label-md text-primary border border-primary px-4 py-2 rounded-lg hover:bg-primary-container/10 transition-colors">تتبع الطلب</button>
+</div>
+</div>
+<!-- Notification Card: Unread -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute right-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex-shrink-0 w-12 h-12 bg-secondary-container/30 rounded-full flex items-center justify-center text-secondary mt-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">percent</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">عرض جديد متاح لك</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">منذ ١ ساعة</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-2">استخدم الكود <span class="font-bold text-primary">SAVE20</span> للحصول على خصم 20% على جميع المنتجات الإلكترونية. صالح لمدة 24 ساعة.</p>
+<button class="font-label-md text-label-md text-primary bg-primary-fixed/20 px-4 py-2 rounded-lg hover:bg-primary-fixed/40 transition-colors">تسوق الآن</button>
+</div>
+</div>
+<!-- Notification Card: Read -->
+<div class="bg-surface-bright border border-surface-variant rounded-xl p-4 flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow opacity-75">
+<div class="flex-shrink-0 w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-on-surface-variant mt-1">
+<span class="material-symbols-outlined">inventory</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-md text-label-md text-on-surface font-semibold">تحديث حالة الطلب</h3>
+<span class="font-label-sm text-label-sm text-outline whitespace-nowrap">أمس</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">تم استلام طلبك رقم #45892 ويجري تجهيزه الآن.</p>
+</div>
+</div>
+<!-- Notification Card: Read -->
+<div class="bg-surface-bright border border-surface-variant rounded-xl p-4 flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow opacity-75">
+<div class="flex-shrink-0 w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-on-surface-variant mt-1">
+<span class="material-symbols-outlined">account_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-md text-label-md text-on-surface font-semibold">اكتمل تسجيل الدخول</h3>
+<span class="font-label-sm text-label-sm text-outline whitespace-nowrap">٣ أيام</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">تم تسجيل الدخول إلى حسابك من جهاز جديد (iPhone 14) في الرياض.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center px-2 py-3 bg-surface dark:bg-surface-dim shadow-lg border-t border-outline-variant dark:border-outline docked full-width bottom-0 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-lowest transition-all active:scale-90 transition-transform p-2 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-lowest transition-all active:scale-90 transition-transform p-2 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">search</span>
+<span class="font-label-sm text-label-sm">البحث</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-lowest transition-all active:scale-90 transition-transform p-2 rounded-xl relative" href="#">
+<span class="material-symbols-outlined mb-1">shopping_cart</span>
+<span class="font-label-sm text-label-sm">السلة</span>
+<span class="absolute top-1 right-2 w-3 h-3 bg-error rounded-full border-2 border-surface"></span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-lowest transition-all active:scale-90 transition-transform p-2 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">local_shipping</span>
+<span class="font-label-sm text-label-sm">طلباتي</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-secondary-fixed-dim bg-primary-container/10 rounded-xl px-3 py-1 hover:bg-surface-container-lowest transition-all active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+</body></html>

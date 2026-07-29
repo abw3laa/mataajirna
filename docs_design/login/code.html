@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تسجيل الدخول | متجرنا</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-container": "#006f66",
+                        "on-secondary-fixed": "#00201d",
+                        "on-surface": "#1a1c1d",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#d9e2ff",
+                        "surface-variant": "#e2e2e4",
+                        "on-primary-fixed-variant": "#00429c",
+                        "tertiary-container": "#853100",
+                        "surface-container-low": "#f3f3f5",
+                        "surface-tint": "#2b5bb5",
+                        "tertiary": "#602100",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#006a62",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e2e2e4",
+                        "tertiary-fixed": "#ffdbcd",
+                        "outline": "#737783",
+                        "surface-dim": "#d9dadc",
+                        "on-secondary-fixed-variant": "#005049",
+                        "secondary-container": "#81f3e5",
+                        "inverse-primary": "#b0c6ff",
+                        "primary-container": "#0d47a1",
+                        "on-primary-fixed": "#001945",
+                        "inverse-surface": "#2f3132",
+                        "background": "#f9f9fb",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-container": "#eeeef0",
+                        "on-background": "#1a1c1d",
+                        "surface-bright": "#f9f9fb",
+                        "inverse-on-surface": "#f0f0f2",
+                        "primary": "#003178",
+                        "on-surface-variant": "#434652",
+                        "surface-container-high": "#e8e8ea",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface": "#f9f9fb",
+                        "secondary-fixed-dim": "#66d9cc",
+                        "on-tertiary-container": "#ffa781",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#84f5e8",
+                        "outline-variant": "#c3c6d4",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-primary-container": "#a1bbff",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "on-tertiary-fixed": "#360f00"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-tablet": "24px",
+                        "gutter": "16px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-mobile": "16px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["IBM Plex Sans Arabic"],
+                        "headline-sm": ["IBM Plex Sans Arabic"],
+                        "label-md": ["IBM Plex Sans Arabic"],
+                        "headline-md": ["IBM Plex Sans Arabic"],
+                        "label-sm": ["IBM Plex Sans Arabic"],
+                        "body-md": ["IBM Plex Sans Arabic"],
+                        "body-lg": ["IBM Plex Sans Arabic"]
+                    },
+                    fontSize: {
+                        "display-lg": ["30px", { "lineHeight": "42px", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "34px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col md:flex-row selection:bg-primary-container selection:text-on-primary-container">
+<!-- Note: TopAppBar and BottomNavBar are suppressed intentionally as this is a linear/transactional screen (Login). -->
+<!-- Image / Branding Section (Hidden on Mobile, Half Screen on Desktop) -->
+<div class="hidden md:flex md:w-1/2 relative bg-surface-container-low overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A sophisticated, high-end conceptual still-life photography piece representing luxury e-commerce. The scene features minimalist geometric pedestals in soft cream and pristine white tones, elegantly arranged in a bright, light-mode studio. Subtle, warm natural sunlight casts soft, diffused shadows, creating a serene and premium aesthetic. The overall mood is effortless luxury, with precise systematic layout and expansive whitespace, emphasizing a corporate-minimalist hybrid style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuACCAWh6gLMEvhKlW3lVlsyUAUUHQFd3gzGyjZCLmH_vrPZidyt8BBy5kZ1_027TbWCtc0SdjuUGpnWd0fH9zektv-c_VNtJdh-FikfVXLTHcx6-3cF7WD7txBL1e1jLwKIzvgafE2D8chn3ePcX5EKFiDPdj7d-VYaQoUSOhdNZwaiVGQbKZRDmm9DfsZPp9oU6DAlFxDdbDPF7Fr65_CdAp4t0rBINBNA-L5zvFTnKhuKYZiqr9fo')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim/80 to-transparent"></div>
+<div class="absolute bottom-12 right-12 text-surface-container-lowest">
+<h2 class="font-display-lg text-display-lg mb-2 text-white drop-shadow-md">اكتشف الجودة</h2>
+<p class="font-body-lg text-body-lg text-white/90 max-w-md drop-shadow-sm">وجهتك الأولى للتسوق الراقي والموثوق.</p>
+</div>
+</div>
+<!-- Login Form Section -->
+<div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-surface relative">
+<!-- Subtle background decorative blob -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform -translate-x-1/2 -translate-y-1/2"></div>
+<div class="w-full max-w-md space-y-8 z-10">
+<!-- Header -->
+<div class="text-right space-y-2">
+<div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-xl flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-3xl">storefront</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface">مرحباً بعودتك</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">سجل دخولك للمتابعة إلى حسابك</p>
+</div>
+<!-- Form -->
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<!-- Email / Phone Field -->
+<div class="space-y-2 text-right">
+<label class="block font-label-md text-label-md text-on-surface" for="identifier">البريد الإلكتروني أو رقم الهاتف</label>
+<div class="relative">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">person</span>
+</div>
+<input class="block w-full pr-10 pl-3 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface font-body-md focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm placeholder-outline" dir="rtl" id="identifier" name="identifier" placeholder="أدخل بريدك أو رقمك" type="text"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2 text-right">
+<div class="flex items-center justify-between">
+<a class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant transition-colors" href="#">نسيت كلمة المرور؟</a>
+<label class="block font-label-md text-label-md text-on-surface" for="password">كلمة المرور</label>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">lock</span>
+</div>
+<input class="block w-full pr-10 pl-3 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface font-body-md focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm placeholder-outline text-left" dir="ltr" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-2">
+<button class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm font-headline-sm text-headline-sm text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors active:scale-[0.98]" type="submit">
+                        تسجيل الدخول
+                    </button>
+</div>
+</form>
+<!-- Divider -->
+<div class="mt-8">
+<div class="relative">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="px-2 bg-surface text-on-surface-variant font-label-sm text-label-sm">أو</span>
+</div>
+</div>
+</div>
+<!-- Sign Up Prompt -->
+<div class="text-center font-body-md text-body-md mt-6">
+<span class="text-on-surface-variant">ليس لديك حساب؟</span>
+<a class="font-label-md text-label-md text-primary hover:underline hover:text-on-primary-fixed-variant mr-1" href="#">إنشاء حساب جديد</a>
+</div>
+</div>
+</div>
+</body></html>

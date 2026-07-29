@@ -1,0 +1,227 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
+import '../../../../core/widgets/secondary_button.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../catalog/domain/product.dart';
+import '../../../catalog/presentation/catalog_providers.dart';
+
+/// شاشة موحّدة للإضافة والتعديل. productId == null => إضافة منتج جديد.
+class ProductFormScreen extends ConsumerStatefulWidget {
+  const ProductFormScreen({super.key, this.productId});
+  final String? productId;
+
+  @override
+  ConsumerState<ProductFormScreen> createState() => _ProductFormScreenState();
+}
+
+class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _discountController = TextEditingController();
+  String? _categoryId;
+  bool _inStock = true;
+  bool _isSaving = false;
+  bool _loaded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final categoriesAsync = ref.watch(categoriesProvider);
+    final isEdit = widget.productId != null;
+
+    if (isEdit && !_loaded) {
+      final existingAsync = ref.watch(productDetailsProvider(widget.productId!));
+      existingAsync.whenData((p) {
+        if (p != null && !_loaded) {
+          _nameController.text = p.name;
+          _descController.text = p.description;
+          _priceController.text = p.price.toStringAsFixed(0);
+          _categoryId = p.categoryId;
+          _inStock = p.inStock;
+          _loaded = true;
+        }
+      });
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(isEdit ? t.editProfile : t.addNewProduct)),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.marginMobile),
+          children: [
+            if (!isEdit) ...[
+              Text(t.addNewProduct, style: AppTextStyles.headlineMd(), textAlign: TextAlign.right),
+              const SizedBox(height: 4),
+              Text(t.addNewProductSubtitle, style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant), textAlign: TextAlign.right),
+              const SizedBox(height: AppSpacing.stackLg),
+            ],
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.marginMobile),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(t.basicInfo, style: AppTextStyles.headlineSm(), textAlign: TextAlign.right),
+                    const SizedBox(height: AppSpacing.stackMd),
+                    AppTextField(
+                      label: t.productName,
+                      hint: t.productNameHint,
+                      controller: _nameController,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'هذا الحقل مطلوب' : null,
+                    ),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    AppTextField(
+                      label: t.productDescription,
+                      hint: t.productDescriptionHint,
+                      controller: _descController,
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    Align(alignment: Alignment.centerRight, child: Text(t.category, style: AppTextStyles.labelMd())),
+                    const SizedBox(height: 8),
+                    categoriesAsync.when(
+                      data: (categories) => DropdownButtonFormField<String>(
+                        value: _categoryId,
+                        hint: Text(t.selectCategory),
+                        items: [for (final c in categories) DropdownMenuItem(value: c.id, child: Text(c.name))],
+                        onChanged: (v) => setState(() => _categoryId = v),
+                      ),
+                      loading: () => const LinearProgressIndicator(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    Align(alignment: Alignment.centerRight, child: Text(t.stockStatus, style: AppTextStyles.labelMd())),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(t.outOfStock),
+                        Radio<bool>(value: false, groupValue: _inStock, onChanged: (v) => setState(() => _inStock = v!)),
+                        Text(t.inStock),
+                        Radio<bool>(value: true, groupValue: _inStock, onChanged: (v) => setState(() => _inStock = v!)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.marginMobile),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(t.productImage, style: AppTextStyles.headlineSm(), textAlign: TextAlign.right),
+                    const SizedBox(height: AppSpacing.stackMd),
+                    InkWell(
+                      onTap: () {},
+                      child: Container(
+                        height: 140,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.outlineVariant, width: 1.5),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_photo_alternate_outlined, size: 32, color: AppColors.outline),
+                            const SizedBox(height: 8),
+                            Text(t.uploadImageHint, style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant)),
+                            const SizedBox(height: 4),
+                            Text(t.uploadImageLimit, style: AppTextStyles.labelSm()),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.marginMobile),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(t.pricing, style: AppTextStyles.headlineSm(), textAlign: TextAlign.right),
+                    const SizedBox(height: AppSpacing.stackMd),
+                    AppTextField(
+                      label: t.basePrice,
+                      hint: '0.00',
+                      controller: _priceController,
+                      keyboardType: TextInputType.number,
+                      validator: (v) => (v == null || double.tryParse(v) == null) ? 'أدخل رقماً صحيحاً' : null,
+                    ),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    AppTextField(
+                      label: t.discountPercent,
+                      hint: '0',
+                      controller: _discountController,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.stackLg),
+            Row(
+              children: [
+                Expanded(child: SecondaryButton(label: t.cancel, onPressed: () => context.pop())),
+                const SizedBox(width: AppSpacing.stackMd),
+                Expanded(
+                  child: PrimaryButton(
+                    label: t.save,
+                    icon: Icons.save_outlined,
+                    isLoading: _isSaving,
+                    onPressed: _save,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.stackLg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSaving = true);
+    try {
+      final price = double.parse(_priceController.text);
+      final discountPercent = double.tryParse(_discountController.text) ?? 0;
+      final discountPrice = discountPercent > 0 ? price * (1 - discountPercent / 100) : null;
+
+      // ⚠️ استدعاء الكتابة هذا في الإنتاج يمر عبر Cloud Function/Firestore
+      // ويُرفض من الخادم لأي مستخدم لا يحمل role == admin — بصرف النظر عن
+      // وصول المستخدم لهذه الشاشة من عدمه على العميل.
+      await ref.read(catalogRepositoryProvider).upsertProduct(
+            Product(
+              id: widget.productId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+              name: _nameController.text,
+              description: _descController.text,
+              price: price,
+              discountPrice: discountPrice,
+              categoryId: _categoryId ?? 'electronics',
+              categoryName: _categoryId ?? '',
+              imageUrl: 'https://picsum.photos/seed/${_nameController.text.hashCode}/600',
+              inStock: _inStock,
+            ),
+          );
+      if (mounted) context.pop();
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+}

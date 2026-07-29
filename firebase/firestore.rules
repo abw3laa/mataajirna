@@ -1,0 +1,95 @@
+rules_version = '2';
+
+// ============================================================================
+// قواعد أمان Firestore — هذه هي طبقة الفرض الحقيقية والملزمة للصلاحيات.
+// أي تحقق من الدور داخل تطبيق Flutter هو لتحسين تجربة المستخدم (UX) فقط
+// ولا يُعتد به أمنياً. كل قراءة/كتابة تُعاد التحقق منها هنا بغض النظر عمّا
+// يُرسله العميل.
+//
+// الدور (admin/user) يُقرأ حصراً من request.auth.token.role، وهو custom
+// claim على Firebase Auth ID Token، يُضبط فقط عبر Cloud Function محمية
+// (انظر functions/index.js -> setUserRole). لا توجد أي وسيلة للعميل
+// لتعديل هذا الحقل مباشرة.
+// ============================================================================
+
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isAdmin() {
+  return isSignedIn() && request.auth.token.role == 'admin';
+}
+
+function isOwner(userId) {
+  return isSignedIn() && request.auth.uid == userId;
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------- المستخدمون ----------------
+    // كل مستخدم يقرأ/يعدّل ملفه الشخصي فقط. حقل role هنا (إن وُجد) هو نسخة
+    // للعرض فقط ولا يُستخدم أبداً كمصدر حقيقة أمني — لذلك يُمنع أي تعديل عليه.
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+                    && !('role' in request.resource.data); // لا يمكن للمستخدم تعيين دوره بنفسه
+      allow update: if isOwner(userId)
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+      allow delete: if false;
+    }
+
+    // ---------------- التصنيفات والمنتجات والبانرات ----------------
+    // القراءة عامة (كتالوج متجر)، الكتابة للمدير فقط.
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------------- السلة ----------------
+    // كل مستخدم يملك سلته فقط.
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /items/{itemId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ---------------- الطلبات ----------------
+    // المستخدم: يُنشئ طلباته الخاصة ويقرأها فقط (لا يعدّل الحالة).
+    // المدير: يقرأ كل الطلبات ويحدّث الحالة (ويُفضَّل عبر Cloud Function
+    // لضمان تسجيل سجل تدقيق statusHistory بدلاً من كتابة مباشرة).
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+      allow update: if isAdmin(); // العميل لا يعدّل حالة الطلب مباشرة أبداً
+      allow delete: if false;
+    }
+
+    // ---------------- الإشعارات ----------------
+    match /notifications/{userId}/items/{notificationId} {
+      allow read, update: if isOwner(userId);
+      allow create: if isAdmin(); // الإشعارات تُنشأ من الخادم (Cloud Functions)
+      allow delete: if isOwner(userId);
+    }
+
+    // ---------------- إعدادات عامة (أسعار الصرف مثلاً) ----------------
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
