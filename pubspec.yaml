@@ -27,7 +27,11 @@ dependencies:
   firebase_storage: ^12.3.0
 
   # Localization / i18n
-  intl: ^0.20.2
+  # ملاحظة: intl مثبَّتة على ^0.19.0 لأن flutter_localizations (من Flutter SDK
+  # 3.24.5 المستخدم في CI) يفرض بالضبط intl 0.19.0. لا تَرفع هذا القيد يدوياً
+  # إلا إذا رفعت نسخة Flutter في .github/workflows/build.yml معها بالتوازي،
+  # وإلا فشل "flutter pub get" بتعارض إصدارات (version solving failed).
+  intl: ^0.19.0
 
   # UI / utils
   cached_network_image: ^3.4.1
