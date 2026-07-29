@@ -1,0 +1,120 @@
+name: Build Flutter App
+
+# يعمل تلقائياً عند كل push/PR على main، ويمكن تشغيله يدوياً من تبويب Actions
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: "3.24.5"
+
+jobs:
+  analyze:
+    name: تحليل وفحص الكود (flutter analyze)
+    runs-on: ubuntu-latest
+    steps:
+      - name: استنساخ المستودع
+        uses: actions/checkout@v4
+
+      - name: تثبيت Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: عرض نسخة Flutter/Dart
+        run: flutter --version
+
+      - name: جلب الاعتماديات
+        run: flutter pub get
+
+      - name: توليد ملفات الترجمة (l10n)
+        run: flutter gen-l10n
+
+      - name: التحقق من تنسيق الكود
+        run: dart format --output=none --set-exit-if-changed .
+        continue-on-error: true # لا يوقف البناء، فقط تنبيه في السجل
+
+      - name: تحليل ثابت للكود
+        run: flutter analyze
+
+  test:
+    name: تشغيل الاختبارات (flutter test)
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - name: استنساخ المستودع
+        uses: actions/checkout@v4
+
+      - name: تثبيت Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: جلب الاعتماديات
+        run: flutter pub get
+
+      - name: توليد ملفات الترجمة (l10n)
+        run: flutter gen-l10n
+
+      - name: تشغيل الاختبارات
+        run: flutter test
+        continue-on-error: true # لا يوجد اختبارات بعد؛ لا نوقف البناء بسببها
+
+  build-android:
+    name: بناء تطبيق أندرويد (APK)
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - name: استنساخ المستودع
+        uses: actions/checkout@v4
+
+      - name: تثبيت Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: تثبيت Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: جلب الاعتماديات
+        run: flutter pub get
+
+      - name: توليد ملفات الترجمة (l10n)
+        run: flutter gen-l10n
+
+      # ⚠️ ملاحظة: إن ربطت Firebase لاحقاً، يجب رفع google-services.json كسرّ
+      # (Secret) في المستودع وكتابته هنا قبل خطوة البناء، مثال:
+      # - name: كتابة google-services.json من الأسرار
+      #   run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
+
+      - name: بناء APK (وضع Release، بتوقيع debug مؤقت)
+        run: flutter build apk --release
+
+      - name: رفع APK كمخرجات (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: matajirna-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+
+      - name: بناء App Bundle (AAB) لأغراض النشر على Google Play
+        run: flutter build appbundle --release
+
+      - name: رفع AAB كمخرجات (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: matajirna-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 14
