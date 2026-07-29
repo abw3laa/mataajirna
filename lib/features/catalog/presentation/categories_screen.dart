@@ -21,7 +21,9 @@ class CategoriesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.shopping_bag_outlined), onPressed: () => context.go('/cart')),
+        leading: IconButton(
+            icon: const Icon(Icons.shopping_bag_outlined),
+            onPressed: () => context.go('/cart')),
         title: Text(t.categories),
       ),
       body: Column(
@@ -36,7 +38,8 @@ class CategoriesScreen extends ConsumerWidget {
                       hintText: t.searchProducts,
                       prefixIcon: const Icon(Icons.search_rounded),
                     ),
-                    onSubmitted: (v) => ref.read(searchQueryProvider.notifier).state = v,
+                    onSubmitted: (v) =>
+                        ref.read(searchQueryProvider.notifier).state = v,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.stackSm),
@@ -44,7 +47,8 @@ class CategoriesScreen extends ConsumerWidget {
                   onPressed: () {},
                   icon: const Icon(Icons.tune_rounded, size: 18),
                   label: Text(t.filterSort),
-                  style: OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
+                  style:
+                      OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
                 ),
               ],
             ),
@@ -54,14 +58,17 @@ class CategoriesScreen extends ConsumerWidget {
             child: categoriesAsync.when(
               data: (categories) => ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.marginMobile),
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: AppSpacing.stackSm),
                     child: CategoryChip(
                       label: t.all,
                       selected: selectedCategory == 'all',
-                      onTap: () => ref.read(selectedCategoryProvider.notifier).state = 'all',
+                      onTap: () => ref
+                          .read(selectedCategoryProvider.notifier)
+                          .state = 'all',
                     ),
                   ),
                   for (final c in categories)
@@ -70,7 +77,9 @@ class CategoriesScreen extends ConsumerWidget {
                       child: CategoryChip(
                         label: c.name,
                         selected: selectedCategory == c.id,
-                        onTap: () => ref.read(selectedCategoryProvider.notifier).state = c.id,
+                        onTap: () => ref
+                            .read(selectedCategoryProvider.notifier)
+                            .state = c.id,
                       ),
                     ),
                 ],
@@ -84,11 +93,16 @@ class CategoriesScreen extends ConsumerWidget {
             child: productsAsync.when(
               data: (products) {
                 if (products.isEmpty) {
-                  return EmptyView(title: 'لا توجد منتجات', subtitle: 'جرّب تصنيفاً آخر أو كلمة بحث مختلفة');
+                  return const EmptyView(
+                      title: 'لا توجد منتجات',
+                      subtitle: 'جرّب تصنيفاً آخر أو كلمة بحث مختلفة');
                 }
                 return GridView.builder(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.marginMobile, 0, AppSpacing.marginMobile, AppSpacing.marginMobile,
+                    AppSpacing.marginMobile,
+                    0,
+                    AppSpacing.marginMobile,
+                    AppSpacing.marginMobile,
                   ),
                   itemCount: products.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

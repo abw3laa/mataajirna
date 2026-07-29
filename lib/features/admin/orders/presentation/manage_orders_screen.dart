@@ -30,17 +30,24 @@ class ManageOrdersScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(t.manageOrders, style: AppTextStyles.displayLg(), textAlign: TextAlign.right),
+                Text(t.manageOrders,
+                    style: AppTextStyles.displayLg(),
+                    textAlign: TextAlign.right),
                 const SizedBox(height: 4),
-                Text(t.manageOrdersSubtitle, style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant), textAlign: TextAlign.right),
+                Text(t.manageOrdersSubtitle,
+                    style:
+                        AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant),
+                    textAlign: TextAlign.right),
                 const SizedBox(height: AppSpacing.stackMd),
                 Row(
                   children: [
                     _filterChip(context, ref, null, t.all),
                     const SizedBox(width: 8),
-                    _filterChip(context, ref, OrderStatus.processing, t.statusProcessing),
+                    _filterChip(context, ref, OrderStatus.processing,
+                        t.statusProcessing),
                     const SizedBox(width: 8),
-                    _filterChip(context, ref, OrderStatus.completed, t.statusCompleted),
+                    _filterChip(
+                        context, ref, OrderStatus.completed, t.statusCompleted),
                   ],
                 ),
               ],
@@ -49,12 +56,20 @@ class ManageOrdersScreen extends ConsumerWidget {
           Expanded(
             child: ordersAsync.when(
               data: (orders) {
-                final filtered = filter == null ? orders : orders.where((o) => o.status == filter).toList();
-                if (filtered.isEmpty) return EmptyView(title: 'لا توجد طلبات', icon: Icons.receipt_long_outlined);
+                final filtered = filter == null
+                    ? orders
+                    : orders.where((o) => o.status == filter).toList();
+                if (filtered.isEmpty) {
+                  return const EmptyView(
+                      title: 'لا توجد طلبات',
+                      icon: Icons.receipt_long_outlined);
+                }
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.marginMobile),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.stackMd),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.stackMd),
                   itemBuilder: (context, i) {
                     final order = filtered[i];
                     return Card(
@@ -70,8 +85,11 @@ class ManageOrdersScreen extends ConsumerWidget {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text('${t.orderNumber}${order.id}', style: AppTextStyles.bodyMd().copyWith(fontWeight: FontWeight.w700)),
-                                    Text('${t.customer}: ${order.customerName}', style: AppTextStyles.labelSm()),
+                                    Text('${t.orderNumber}${order.id}',
+                                        style: AppTextStyles.bodyMd().copyWith(
+                                            fontWeight: FontWeight.w700)),
+                                    Text('${t.customer}: ${order.customerName}',
+                                        style: AppTextStyles.labelSm()),
                                   ],
                                 ),
                               ],
@@ -80,7 +98,9 @@ class ManageOrdersScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(money.format(order.total), style: AppTextStyles.headlineSm(color: AppColors.primary)),
+                                Text(money.format(order.total),
+                                    style: AppTextStyles.headlineSm(
+                                        color: AppColors.primary)),
                                 Text(t.total, style: AppTextStyles.labelMd()),
                               ],
                             ),
@@ -88,22 +108,30 @@ class ManageOrdersScreen extends ConsumerWidget {
                             Row(
                               children: [
                                 Expanded(
-                                  child: OutlinedButton(onPressed: () {}, child: Text(t.viewDetails)),
+                                  child: OutlinedButton(
+                                      onPressed: () {},
+                                      child: Text(t.viewDetails)),
                                 ),
                                 const SizedBox(width: AppSpacing.stackSm),
                                 Expanded(
                                   child: DropdownButtonFormField<OrderStatus>(
-                                    value: order.status,
-                                    decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                                    initialValue: order.status,
+                                    decoration: const InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12)),
                                     items: [
                                       for (final s in OrderStatus.values)
-                                        DropdownMenuItem(value: s, child: Text(_statusLabel(s, t))),
+                                        DropdownMenuItem(
+                                            value: s,
+                                            child: Text(_statusLabel(s, t))),
                                     ],
                                     onChanged: (s) {
                                       if (s == null) return;
                                       // ⚠️ في الإنتاج: يستدعي Cloud Function `updateOrderStatus`
                                       // التي تتحقق من صلاحية admin في الخادم قبل التحديث الفعلي.
-                                      ref.read(ordersRepositoryProvider).updateOrderStatus(order.id, s);
+                                      ref
+                                          .read(ordersRepositoryProvider)
+                                          .updateOrderStatus(order.id, s);
                                     },
                                   ),
                                 ),
@@ -117,7 +145,11 @@ class ManageOrdersScreen extends ConsumerWidget {
                 );
               },
               loading: () => const LoadingView(),
-              error: (e, _) => AppErrorView(title: t.somethingWentWrong, message: e.toString(), retryLabel: t.retry, onRetry: () => ref.invalidate(allOrdersProvider)),
+              error: (e, _) => AppErrorView(
+                  title: t.somethingWentWrong,
+                  message: e.toString(),
+                  retryLabel: t.retry,
+                  onRetry: () => ref.invalidate(allOrdersProvider)),
             ),
           ),
         ],
@@ -125,7 +157,8 @@ class ManageOrdersScreen extends ConsumerWidget {
     );
   }
 
-  Widget _filterChip(BuildContext context, WidgetRef ref, OrderStatus? status, String label) {
+  Widget _filterChip(
+      BuildContext context, WidgetRef ref, OrderStatus? status, String label) {
     final selected = ref.watch(ordersFilterProvider) == status;
     return Expanded(
       child: OutlinedButton(
@@ -141,11 +174,20 @@ class ManageOrdersScreen extends ConsumerWidget {
 
   Widget _statusBadge(OrderStatus status) {
     return switch (status) {
-      OrderStatus.processing => const StatusBadge(label: 'قيد المعالجة', tone: BadgeTone.warning, icon: Icons.local_shipping_outlined),
-      OrderStatus.pending => const StatusBadge(label: 'قيد الانتظار', tone: BadgeTone.warning),
-      OrderStatus.completed => const StatusBadge(label: 'مكتمل', tone: BadgeTone.success, icon: Icons.check_circle_outline_rounded),
-      OrderStatus.shipped => const StatusBadge(label: 'تم الشحن', tone: BadgeTone.info),
-      OrderStatus.cancelled => const StatusBadge(label: 'ملغى', tone: BadgeTone.error),
+      OrderStatus.processing => const StatusBadge(
+          label: 'قيد المعالجة',
+          tone: BadgeTone.warning,
+          icon: Icons.local_shipping_outlined),
+      OrderStatus.pending =>
+        const StatusBadge(label: 'قيد الانتظار', tone: BadgeTone.warning),
+      OrderStatus.completed => const StatusBadge(
+          label: 'مكتمل',
+          tone: BadgeTone.success,
+          icon: Icons.check_circle_outline_rounded),
+      OrderStatus.shipped =>
+        const StatusBadge(label: 'تم الشحن', tone: BadgeTone.info),
+      OrderStatus.cancelled =>
+        const StatusBadge(label: 'ملغى', tone: BadgeTone.error),
     };
   }
 

@@ -21,15 +21,23 @@ class ManageProductsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.manageProducts),
-        actions: [IconButton(icon: const Icon(Icons.add_rounded), onPressed: () => context.push('/admin/products/new'))],
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () => context.push('/admin/products/new'))
+        ],
       ),
       body: productsAsync.when(
         data: (products) {
-          if (products.isEmpty) return EmptyView(title: 'لا توجد منتجات', icon: Icons.inventory_2_outlined);
+          if (products.isEmpty) {
+            return const EmptyView(
+                title: 'لا توجد منتجات', icon: Icons.inventory_2_outlined);
+          }
           return ListView.separated(
             padding: const EdgeInsets.all(AppSpacing.marginMobile),
             itemCount: products.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.stackSm),
+            separatorBuilder: (_, __) =>
+                const SizedBox(height: AppSpacing.stackSm),
             itemBuilder: (context, i) {
               final p = products[i];
               return Card(
@@ -37,23 +45,30 @@ class ManageProductsScreen extends ConsumerWidget {
                   onTap: () => context.push('/admin/products/${p.id}'),
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: Image.network(p.imageUrl, width: 48, height: 48, fit: BoxFit.cover),
+                    child: Image.network(p.imageUrl,
+                        width: 48, height: 48, fit: BoxFit.cover),
                   ),
                   title: Text(p.name, textAlign: TextAlign.right),
                   subtitle: Text(
                     p.inStock ? t.inStock : t.outOfStock,
-                    style: TextStyle(color: p.inStock ? AppColors.success : AppColors.error),
+                    style: TextStyle(
+                        color: p.inStock ? AppColors.success : AppColors.error),
                     textAlign: TextAlign.right,
                   ),
                   trailing: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(money.format(p.discountPrice ?? p.price), style: AppTextStyles.bodyMd().copyWith(fontWeight: FontWeight.w700)),
+                      Text(money.format(p.discountPrice ?? p.price),
+                          style: AppTextStyles.bodyMd()
+                              .copyWith(fontWeight: FontWeight.w700)),
                       IconButton(
                         iconSize: 18,
-                        icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-                        onPressed: () => ref.read(catalogRepositoryProvider).deleteProduct(p.id),
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            color: AppColors.error),
+                        onPressed: () => ref
+                            .read(catalogRepositoryProvider)
+                            .deleteProduct(p.id),
                       ),
                     ],
                   ),
@@ -63,7 +78,11 @@ class ManageProductsScreen extends ConsumerWidget {
           );
         },
         loading: () => const LoadingView(),
-        error: (e, _) => AppErrorView(title: t.somethingWentWrong, message: e.toString(), retryLabel: t.retry, onRetry: () => ref.invalidate(productsProvider)),
+        error: (e, _) => AppErrorView(
+            title: t.somethingWentWrong,
+            message: e.toString(),
+            retryLabel: t.retry,
+            onRetry: () => ref.invalidate(productsProvider)),
       ),
     );
   }

@@ -12,7 +12,7 @@ class MockOrdersRepository implements OrdersRepository {
       id: 'ORD-88392',
       customerName: 'أحمد عبدالله',
       userId: 'user-uid',
-      items: [
+      items: const [
         CartItem(
           product: Product(
             id: 'p11',
@@ -35,7 +35,7 @@ class MockOrdersRepository implements OrdersRepository {
       id: 'ORD-88405',
       customerName: 'أحمد عبدالله',
       userId: 'user-uid',
-      items: [
+      items: const [
         CartItem(
           product: Product(
             id: 'p2',
@@ -58,7 +58,7 @@ class MockOrdersRepository implements OrdersRepository {
       id: 'ORD-87102',
       customerName: 'سارة خالد',
       userId: 'user-2',
-      items: [
+      items: const [
         CartItem(
           product: Product(
             id: 'p3',
@@ -84,7 +84,8 @@ class MockOrdersRepository implements OrdersRepository {
   @override
   Stream<List<Order>> watchMyOrders() async* {
     yield _orders.where((o) => o.userId == 'user-uid').toList();
-    yield* _controller.stream.map((list) => list.where((o) => o.userId == 'user-uid').toList());
+    yield* _controller.stream
+        .map((list) => list.where((o) => o.userId == 'user-uid').toList());
   }
 
   @override
@@ -94,7 +95,8 @@ class MockOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<Order> placeOrder({required List<CartItem> items, required double total}) async {
+  Future<Order> placeOrder(
+      {required List<CartItem> items, required double total}) async {
     final order = Order(
       id: 'ORD-${DateTime.now().millisecondsSinceEpoch % 100000}',
       customerName: 'أحمد عبدالله',

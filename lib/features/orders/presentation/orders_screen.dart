@@ -25,12 +25,14 @@ class OrdersScreen extends ConsumerWidget {
       body: ordersAsync.when(
         data: (orders) {
           if (orders.isEmpty) {
-            return EmptyView(title: 'لا توجد طلبات بعد', icon: Icons.receipt_long_outlined);
+            return const EmptyView(
+                title: 'لا توجد طلبات بعد', icon: Icons.receipt_long_outlined);
           }
           return ListView(
             padding: const EdgeInsets.all(AppSpacing.marginMobile),
             children: [
-              Text(t.myOrders, style: AppTextStyles.displayLg(), textAlign: TextAlign.right),
+              Text(t.myOrders,
+                  style: AppTextStyles.displayLg(), textAlign: TextAlign.right),
               const SizedBox(height: AppSpacing.stackLg),
               for (final order in orders)
                 Padding(
@@ -48,8 +50,10 @@ class OrdersScreen extends ConsumerWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text('${t.orderNumber}${order.id}', style: AppTextStyles.labelMd()),
-                                  Text(_formatDate(order.createdAt), style: AppTextStyles.labelSm()),
+                                  Text('${t.orderNumber}${order.id}',
+                                      style: AppTextStyles.labelMd()),
+                                  Text(_formatDate(order.createdAt),
+                                      style: AppTextStyles.labelSm()),
                                 ],
                               ),
                             ],
@@ -61,16 +65,24 @@ class OrdersScreen extends ConsumerWidget {
                               child: Row(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                                    child: Image.network(item.product.imageUrl, width: 44, height: 44, fit: BoxFit.cover),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.sm),
+                                    child: Image.network(item.product.imageUrl,
+                                        width: 44,
+                                        height: 44,
+                                        fit: BoxFit.cover),
                                   ),
                                   const SizedBox(width: AppSpacing.stackSm),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
                                       children: [
-                                        Text(item.product.name, style: AppTextStyles.bodyMd(), textAlign: TextAlign.right),
-                                        Text('الكمية: ${item.quantity}', style: AppTextStyles.labelSm()),
+                                        Text(item.product.name,
+                                            style: AppTextStyles.bodyMd(),
+                                            textAlign: TextAlign.right),
+                                        Text('الكمية: ${item.quantity}',
+                                            style: AppTextStyles.labelSm()),
                                       ],
                                     ),
                                   ),
@@ -85,14 +97,20 @@ class OrdersScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(money.format(order.total),
-                                      style: AppTextStyles.headlineSm(color: AppColors.primary)),
+                                      style: AppTextStyles.headlineSm(
+                                          color: AppColors.primary)),
                                   Text(t.total, style: AppTextStyles.labelSm()),
                                 ],
                               ),
                               OutlinedButton.icon(
-                                onPressed: () => context.push('/orders/${order.id}'),
-                                icon: const Icon(Icons.arrow_back_rounded, size: 16),
-                                label: Text(order.status == OrderStatus.completed ? t.reorder : t.trackOrder),
+                                onPressed: () =>
+                                    context.push('/orders/${order.id}'),
+                                icon: const Icon(Icons.arrow_back_rounded,
+                                    size: 16),
+                                label: Text(
+                                    order.status == OrderStatus.completed
+                                        ? t.reorder
+                                        : t.trackOrder),
                               ),
                             ],
                           ),
@@ -117,18 +135,37 @@ class OrdersScreen extends ConsumerWidget {
 
   Widget _statusBadge(OrderStatus status) {
     return switch (status) {
-      OrderStatus.shipped => const StatusBadge(label: 'تم الشحن', tone: BadgeTone.info, icon: Icons.local_shipping_outlined),
-      OrderStatus.pending => const StatusBadge(label: 'قيد الانتظار', tone: BadgeTone.warning),
-      OrderStatus.processing => const StatusBadge(label: 'قيد المعالجة', tone: BadgeTone.warning),
-      OrderStatus.completed => const StatusBadge(label: 'مكتمل', tone: BadgeTone.neutral, icon: Icons.check_circle_outline_rounded),
-      OrderStatus.cancelled => const StatusBadge(label: 'ملغى', tone: BadgeTone.error),
+      OrderStatus.shipped => const StatusBadge(
+          label: 'تم الشحن',
+          tone: BadgeTone.info,
+          icon: Icons.local_shipping_outlined),
+      OrderStatus.pending =>
+        const StatusBadge(label: 'قيد الانتظار', tone: BadgeTone.warning),
+      OrderStatus.processing =>
+        const StatusBadge(label: 'قيد المعالجة', tone: BadgeTone.warning),
+      OrderStatus.completed => const StatusBadge(
+          label: 'مكتمل',
+          tone: BadgeTone.neutral,
+          icon: Icons.check_circle_outline_rounded),
+      OrderStatus.cancelled =>
+        const StatusBadge(label: 'ملغى', tone: BadgeTone.error),
     };
   }
 
   String _formatDate(DateTime d) {
     const months = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
     ];
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }

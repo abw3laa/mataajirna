@@ -5,14 +5,26 @@ import 'catalog_repository.dart';
 
 class MockCatalogRepository implements CatalogRepository {
   final _categories = <ProductCategory>[
-    const ProductCategory(id: 'electronics', name: 'الإلكترونيات', imageUrl: 'https://picsum.photos/seed/electronics/200'),
-    const ProductCategory(id: 'fashion', name: 'الأزياء', imageUrl: 'https://picsum.photos/seed/fashion/200'),
-    const ProductCategory(id: 'home', name: 'المنزل', imageUrl: 'https://picsum.photos/seed/home/200'),
-    const ProductCategory(id: 'perfumes', name: 'عطور', imageUrl: 'https://picsum.photos/seed/perfumes/200'),
+    const ProductCategory(
+        id: 'electronics',
+        name: 'الإلكترونيات',
+        imageUrl: 'https://picsum.photos/seed/electronics/200'),
+    const ProductCategory(
+        id: 'fashion',
+        name: 'الأزياء',
+        imageUrl: 'https://picsum.photos/seed/fashion/200'),
+    const ProductCategory(
+        id: 'home',
+        name: 'المنزل',
+        imageUrl: 'https://picsum.photos/seed/home/200'),
+    const ProductCategory(
+        id: 'perfumes',
+        name: 'عطور',
+        imageUrl: 'https://picsum.photos/seed/perfumes/200'),
   ];
 
   late final List<Product> _products = [
-    Product(
+    const Product(
       id: 'p1',
       name: 'عطر خشبي للرجال - 100 مل',
       description: 'عطر خشبي فاخر بثبات عالٍ ورائحة دافئة تدوم طوال اليوم.',
@@ -25,10 +37,11 @@ class MockCatalogRepository implements CatalogRepository {
       badgeLabel: 'خصم',
       badgeTone: BadgeTone.error,
     ),
-    Product(
+    const Product(
       id: 'p2',
       name: 'سماعات رأس لاسلكية بخاصية إلغاء الضوضاء',
-      description: 'سماعات لاسلكية بجودة صوت استثنائية وعزل ضوضاء نشط لمدة استماع تصل إلى 30 ساعة.',
+      description:
+          'سماعات لاسلكية بجودة صوت استثنائية وعزل ضوضاء نشط لمدة استماع تصل إلى 30 ساعة.',
       price: 499,
       categoryId: 'electronics',
       categoryName: 'إلكترونيات',
@@ -37,20 +50,22 @@ class MockCatalogRepository implements CatalogRepository {
       badgeLabel: 'جديد',
       badgeTone: BadgeTone.primary,
     ),
-    Product(
+    const Product(
       id: 'p3',
       name: 'طقم أكواب قهوة سيراميك فاخر',
-      description: 'طقم مكوّن من 6 أكواب سيراميك بتصميم أنيق مناسب للاستخدام اليومي والضيافة.',
+      description:
+          'طقم مكوّن من 6 أكواب سيراميك بتصميم أنيق مناسب للاستخدام اليومي والضيافة.',
       price: 120,
       categoryId: 'home',
       categoryName: 'المنزل',
       imageUrl: 'https://picsum.photos/seed/cups1/600',
       inStock: true,
     ),
-    Product(
+    const Product(
       id: 'p4',
       name: 'ساعة ذكية متقدمة مع تتبع اللياقة',
-      description: 'ساعة ذكية بشاشة AMOLED ومستشعرات صحية متكاملة ومقاومة للماء.',
+      description:
+          'ساعة ذكية بشاشة AMOLED ومستشعرات صحية متكاملة ومقاومة للماء.',
       price: 899,
       discountPrice: 719,
       categoryId: 'electronics',
@@ -60,7 +75,7 @@ class MockCatalogRepository implements CatalogRepository {
       badgeLabel: 'خصم 20%',
       badgeTone: BadgeTone.error,
     ),
-    Product(
+    const Product(
       id: 'p5',
       name: 'لابتوب ألترا بوك 14 بوصة معالج i7',
       description: 'أداء قوي وتصميم رفيع مثالي للعمل والإبداع أثناء التنقل.',
@@ -72,7 +87,7 @@ class MockCatalogRepository implements CatalogRepository {
       badgeLabel: 'خصم 15%',
       badgeTone: BadgeTone.error,
     ),
-    Product(
+    const Product(
       id: 'p6',
       name: 'هاتف ذكي برو ماكس 256 جيجابايت',
       description: 'كاميرا احترافية وأداء فائق مع شاشة عرض متطورة.',
@@ -84,7 +99,7 @@ class MockCatalogRepository implements CatalogRepository {
       inStock: true,
       badgeLabel: 'جديد',
     ),
-    Product(
+    const Product(
       id: 'p7',
       name: 'ساعة ذكية رياضية الجيل الثامن',
       description: 'مصممة للرياضيين مع تتبع دقيق لجميع الأنشطة البدنية.',
@@ -96,7 +111,7 @@ class MockCatalogRepository implements CatalogRepository {
       badgeLabel: 'نفد المخزون',
       badgeTone: BadgeTone.neutral,
     ),
-    Product(
+    const Product(
       id: 'p8',
       name: 'سماعات رأس لاسلكية عازلة للضوضاء',
       description: 'راحة فائقة لجلسات الاستماع الطويلة مع صوت نقي ومتوازن.',
@@ -106,10 +121,11 @@ class MockCatalogRepository implements CatalogRepository {
       imageUrl: 'https://picsum.photos/seed/headphones2/600',
       inStock: true,
     ),
-    Product(
+    const Product(
       id: 'p9',
       name: 'حقيبة جلدية فاخرة',
-      description: 'صُنعت هذه الحقيبة من أجود أنواع الجلد الطبيعي، مصممة لتلبي احتياجاتك اليومية مع الحفاظ على مظهرك الأنيق. تحتوي على جيوب داخلية متعددة لتنظيم أغراضك بسهولة، وحزام كتف قابل للتعديل لراحة قصوى.',
+      description:
+          'صُنعت هذه الحقيبة من أجود أنواع الجلد الطبيعي، مصممة لتلبي احتياجاتك اليومية مع الحفاظ على مظهرك الأنيق. تحتوي على جيوب داخلية متعددة لتنظيم أغراضك بسهولة، وحزام كتف قابل للتعديل لراحة قصوى.',
       price: 550,
       discountPrice: 450,
       categoryId: 'fashion',
@@ -125,7 +141,7 @@ class MockCatalogRepository implements CatalogRepository {
       badgeLabel: 'جديد',
       badgeTone: BadgeTone.success,
     ),
-    Product(
+    const Product(
       id: 'p10',
       name: 'نظارات شمسية كلاسيكية',
       description: 'حماية كاملة من الأشعة فوق البنفسجية بتصميم أنيق خالد.',
@@ -135,7 +151,7 @@ class MockCatalogRepository implements CatalogRepository {
       imageUrl: 'https://picsum.photos/seed/sunglasses1/600',
       inStock: true,
     ),
-    Product(
+    const Product(
       id: 'p11',
       name: 'محفظة جلدية',
       description: 'محفظة جلد طبيعي أنيقة بعدة جيوب لحفظ البطاقات والنقود.',
@@ -158,7 +174,9 @@ class MockCatalogRepository implements CatalogRepository {
     }
     if (query != null && query.trim().isNotEmpty) {
       final q = query.trim();
-      list = list.where((p) => p.name.contains(q) || p.description.contains(q)).toList();
+      list = list
+          .where((p) => p.name.contains(q) || p.description.contains(q))
+          .toList();
     }
     return Stream.value(list);
   }

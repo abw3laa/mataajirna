@@ -18,7 +18,8 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String productId;
 
   @override
-  ConsumerState<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+  ConsumerState<ProductDetailsScreen> createState() =>
+      _ProductDetailsScreenState();
 }
 
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
@@ -35,7 +36,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
       body: productAsync.when(
         data: (product) {
           if (product == null) {
-            return EmptyView(title: t.somethingWentWrong, icon: Icons.error_outline_rounded);
+            return EmptyView(
+                title: t.somethingWentWrong, icon: Icons.error_outline_rounded);
           }
           final hasDiscount = product.discountPrice != null;
           return Column(
@@ -49,16 +51,22 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         children: [
                           AspectRatio(
                             aspectRatio: 1,
-                            child: CachedNetworkImage(imageUrl: product.imageUrl, fit: BoxFit.cover),
+                            child: CachedNetworkImage(
+                                imageUrl: product.imageUrl, fit: BoxFit.cover),
                           ),
                           SafeArea(
                             child: Padding(
                               padding: const EdgeInsets.all(AppSpacing.stackMd),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  _RoundIconButton(icon: Icons.favorite_border_rounded, onTap: () {}),
-                                  _RoundIconButton(icon: Icons.arrow_back_rounded, onTap: () => context.pop()),
+                                  _RoundIconButton(
+                                      icon: Icons.favorite_border_rounded,
+                                      onTap: () {}),
+                                  _RoundIconButton(
+                                      icon: Icons.arrow_back_rounded,
+                                      onTap: () => context.pop()),
                                 ],
                               ),
                             ),
@@ -67,7 +75,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             Positioned(
                               top: 70,
                               right: 16,
-                              child: StatusBadge(label: product.badgeLabel!, tone: product.badgeTone),
+                              child: StatusBadge(
+                                  label: product.badgeLabel!,
+                                  tone: product.badgeTone),
                             ),
                         ],
                       ),
@@ -82,11 +92,18 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(money.format(hasDiscount ? product.discountPrice! : product.price),
-                                        style: AppTextStyles.headlineSm(color: AppColors.primary)),
+                                    Text(
+                                        money.format(hasDiscount
+                                            ? product.discountPrice!
+                                            : product.price),
+                                        style: AppTextStyles.headlineSm(
+                                            color: AppColors.primary)),
                                     if (hasDiscount)
                                       Text(money.format(product.price),
-                                          style: AppTextStyles.labelMd().copyWith(decoration: TextDecoration.lineThrough)),
+                                          style: AppTextStyles.labelMd()
+                                              .copyWith(
+                                                  decoration: TextDecoration
+                                                      .lineThrough)),
                                   ],
                                 ),
                                 const Spacer(),
@@ -94,9 +111,14 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text(product.name, style: AppTextStyles.headlineSm(), textAlign: TextAlign.right),
+                                      Text(product.name,
+                                          style: AppTextStyles.headlineSm(),
+                                          textAlign: TextAlign.right),
                                       const SizedBox(height: 4),
-                                      Text(product.categoryName, style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant)),
+                                      Text(product.categoryName,
+                                          style: AppTextStyles.bodyMd(
+                                              color:
+                                                  AppColors.onSurfaceVariant)),
                                     ],
                                   ),
                                 ),
@@ -107,40 +129,58 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(product.inStock ? t.inStock : t.outOfStock,
-                                    style: AppTextStyles.labelMd(color: product.inStock ? AppColors.success : AppColors.error)),
+                                    style: AppTextStyles.labelMd(
+                                        color: product.inStock
+                                            ? AppColors.success
+                                            : AppColors.error)),
                                 const SizedBox(width: 6),
                                 Icon(
-                                  product.inStock ? Icons.check_circle_outline_rounded : Icons.cancel_outlined,
+                                  product.inStock
+                                      ? Icons.check_circle_outline_rounded
+                                      : Icons.cancel_outlined,
                                   size: 18,
-                                  color: product.inStock ? AppColors.success : AppColors.error,
+                                  color: product.inStock
+                                      ? AppColors.success
+                                      : AppColors.error,
                                 ),
                               ],
                             ),
                             if (product.colors.isNotEmpty) ...[
                               const Divider(height: 32),
-                              Align(alignment: Alignment.centerRight, child: Text(t.color, style: AppTextStyles.labelMd())),
+                              Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(t.color,
+                                      style: AppTextStyles.labelMd())),
                               const SizedBox(height: AppSpacing.stackSm),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  for (int i = 0; i < product.colors.length; i++)
+                                  for (int i = 0;
+                                      i < product.colors.length;
+                                      i++)
                                     Padding(
                                       padding: const EdgeInsets.only(right: 10),
                                       child: GestureDetector(
-                                        onTap: () => setState(() => _colorIndex = i),
+                                        onTap: () =>
+                                            setState(() => _colorIndex = i),
                                         child: Container(
                                           width: 36,
                                           height: 36,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: Color(int.parse(product.colors[i].replaceFirst('#', '0xFF'))),
+                                            color: Color(int.parse(product
+                                                .colors[i]
+                                                .replaceFirst('#', '0xFF'))),
                                             border: Border.all(
-                                              color: _colorIndex == i ? AppColors.primary : Colors.transparent,
+                                              color: _colorIndex == i
+                                                  ? AppColors.primary
+                                                  : Colors.transparent,
                                               width: 2,
                                             ),
                                           ),
                                           child: _colorIndex == i
-                                              ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                                              ? const Icon(Icons.check_rounded,
+                                                  size: 16, color: Colors.white)
                                               : null,
                                         ),
                                       ),
@@ -151,9 +191,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             const Divider(height: 32),
                             Align(
                                 alignment: Alignment.centerRight,
-                                child: Text(t.productDescription, style: AppTextStyles.labelMd())),
+                                child: Text(t.productDescription,
+                                    style: AppTextStyles.labelMd())),
                             const SizedBox(height: AppSpacing.stackSm),
-                            Text(product.description, style: AppTextStyles.bodyMd(), textAlign: TextAlign.right),
+                            Text(product.description,
+                                style: AppTextStyles.bodyMd(),
+                                textAlign: TextAlign.right),
                           ],
                         ),
                       ),
@@ -167,7 +210,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   padding: const EdgeInsets.all(AppSpacing.marginMobile),
                   decoration: const BoxDecoration(
                     color: AppColors.surfaceContainerLowest,
-                    border: Border(top: BorderSide(color: AppColors.outlineVariant)),
+                    border: Border(
+                        top: BorderSide(color: AppColors.outlineVariant)),
                   ),
                   child: Row(
                     children: [
@@ -179,12 +223,15 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         child: Row(
                           children: [
                             IconButton(
-                              onPressed: () => setState(() => _quantity = (_quantity + 1)),
+                              onPressed: () =>
+                                  setState(() => _quantity = (_quantity + 1)),
                               icon: const Icon(Icons.add_rounded, size: 18),
                             ),
                             Text('$_quantity', style: AppTextStyles.bodyMd()),
                             IconButton(
-                              onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                              onPressed: _quantity > 1
+                                  ? () => setState(() => _quantity--)
+                                  : null,
                               icon: const Icon(Icons.remove_rounded, size: 18),
                             ),
                           ],
@@ -200,7 +247,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                   for (var i = 0; i < _quantity; i++) {
                                     ref.read(cartProvider.notifier).add(
                                           product,
-                                          color: product.colors.isNotEmpty ? product.colors[_colorIndex] : null,
+                                          color: product.colors.isNotEmpty
+                                              ? product.colors[_colorIndex]
+                                              : null,
                                         );
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -222,7 +271,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           title: t.somethingWentWrong,
           message: e.toString(),
           retryLabel: t.retry,
-          onRetry: () => ref.invalidate(productDetailsProvider(widget.productId)),
+          onRetry: () =>
+              ref.invalidate(productDetailsProvider(widget.productId)),
         ),
       ),
     );
@@ -240,7 +290,7 @@ class _RoundIconButton extends StatelessWidget {
       onTap: onTap,
       customBorder: const CircleBorder(),
       child: CircleAvatar(
-        backgroundColor: Colors.white.withOpacity(0.9),
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
         child: Icon(icon, color: AppColors.onSurface, size: 20),
       ),
     );
