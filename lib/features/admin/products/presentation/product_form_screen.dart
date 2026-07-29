@@ -125,12 +125,16 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         Text(t.outOfStock),
                         Radio<bool>(
                             value: false,
+                            // ignore: deprecated_member_use
                             groupValue: _inStock,
+                            // ignore: deprecated_member_use
                             onChanged: (v) => setState(() => _inStock = v!)),
                         Text(t.inStock),
                         Radio<bool>(
                             value: true,
+                            // ignore: deprecated_member_use
                             groupValue: _inStock,
+                            // ignore: deprecated_member_use
                             onChanged: (v) => setState(() => _inStock = v!)),
                       ],
                     ),
