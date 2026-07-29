@@ -107,10 +107,10 @@ jobs:
           # أو Kotlin DSL (build.gradle.kts) حسب الإصدار — نتعامل مع الحالتين.
           if [ -f android/app/build.gradle.kts ]; then
             GRADLE_FILE=android/app/build.gradle.kts
-            sed -i '/defaultConfig {/a\        minSdk = 30' "$GRADLE_FILE"
+            sed -i 's/minSdk = [0-9]+/minSdk = 30/' "$GRADLE_FILE"
           else
             GRADLE_FILE=android/app/build.gradle
-            sed -i '/defaultConfig {/a\        minSdkVersion 30' "$GRADLE_FILE"
+            sed -i 's/minSdkVersion [0-9]+/minSdkVersion 30/' "$GRADLE_FILE"
           fi
           echo "== $GRADLE_FILE =="
           cat "$GRADLE_FILE"
