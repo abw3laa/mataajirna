@@ -115,7 +115,7 @@ class ManageOrdersScreen extends ConsumerWidget {
                                 const SizedBox(width: AppSpacing.stackSm),
                                 Expanded(
                                   child: DropdownButtonFormField<OrderStatus>(
-                                    initialValue: order.status,
+                                    value: order.status,
                                     decoration: const InputDecoration(
                                         contentPadding: EdgeInsets.symmetric(
                                             horizontal: 12)),
