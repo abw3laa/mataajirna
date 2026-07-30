@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/config/backend_config.dart';
 import '../data/auth_repository.dart';
+import '../data/firebase_auth_repository.dart';
 import '../data/mock_auth_repository.dart';
 import '../domain/app_user.dart';
 
-/// غيّر هذا المزوّد إلى FirebaseAuthRepository() عند ربط Firebase الفعلي
-/// (بعد تشغيل `flutterfire configure` وتفعيل Authentication في المشروع).
-final authRepositoryProvider = Provider<AuthRepository>((ref) => MockAuthRepository());
+/// يبدّل تلقائياً بين Mock وFirebase حسب lib/core/config/backend_config.dart.
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return kUseFirebase ? FirebaseAuthRepository() : MockAuthRepository();
+});
 
 final authStateProvider = StreamProvider<AppUser?>((ref) {
   return ref.watch(authRepositoryProvider).authStateChanges();

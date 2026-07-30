@@ -80,19 +80,49 @@ firebase/
 
 ## الانتقال من Mock إلى Firebase الحقيقي
 
-1. أنشئ مشروع Firebase وفعّل: Authentication (Email/Password)، Firestore، Functions، Storage.
-2. `dart pub global activate flutterfire_cli` ثم `flutterfire configure` — يولّد `lib/firebase_options.dart`.
-3. في `lib/main.dart` فعّل استدعاء `Firebase.initializeApp(...)` (موجود جاهزاً، معلَّق فقط).
-4. غيّر المزوّدات التالية من Mock إلى التنفيذ الحقيقي:
-   - `lib/features/auth/presentation/auth_providers.dart` → `FirebaseAuthRepository()`
-   - أنشئ `FirestoreCatalogRepository` / `FirestoreOrdersRepository` مطابقة لواجهات `catalog_repository.dart` / `orders_repository.dart` (البنية جاهزة، فقط التنفيذ الفعلي بـ `cloud_firestore` مطلوب).
-5. انشر القواعد والدوال:
+المشروع الآن به **مفتاح تبديل واحد**: `lib/core/config/backend_config.dart` → `kUseFirebase`.
+طالما هو `false` (الوضع الافتراضي) يعمل التطبيق ببيانات وهمية بدون أي إعداد. اتبع هذه
+الخطوات بالترتيب، ثم غيّره إلى `true`:
+
+1. **أنشئ مشروع Firebase**: اذهب إلى https://console.firebase.google.com → Add project.
+2. **فعّل الخدمات المطلوبة** من القائمة الجانبية: Authentication (فعّل مزوّد Email/Password) → Firestore Database (ابدأ في وضع Production) → Storage.
+3. **أضف تطبيق أندرويد** داخل مشروع Firebase بـ package name بالضبط:
+   ```
+   com.matajirna.mataajirna
+   ```
+   (هذا هو applicationId الذي يولّده `flutter create --org com.matajirna .` تلقائياً — لا تغيّره إلا إذا غيّرت `--org` في build.yml وREADME معاً).
+4. على جهازك (وليس هنا): ثبّت الأدوات وسجّل الدخول بحساب Google الذي أنشأت به المشروع:
+   ```bash
+   dart pub global activate flutterfire_cli
+   firebase login
+   flutterfire configure
+   ```
+   اختر مشروع Firebase الذي أنشأته، ومنصة Android فقط. هذا يستبدل `lib/firebase_options.dart`
+   (الموجود حالياً كنسخة placeholder) بالقيم الحقيقية لمشروعك، ويُضيف `android/app/google-services.json`.
+
+   > ⚠️ ملاحظة: مجلد `android/` في هذا المستودع **غير مرفوع** (يُولَّد عبر `flutter create` — راجع الأعلى)، لذا نفّذ `flutter create --platforms=android --org com.matajirna .` أولاً إن لم يكن موجوداً محلياً، قبل `flutterfire configure`.
+
+5. غيّر `kUseFirebase` إلى `true` في `lib/core/config/backend_config.dart`.
+6. انشر قواعد الأمان والدوال:
    ```bash
    firebase deploy --only firestore:rules
    cd firebase/functions && npm install && cd ../..
    firebase deploy --only functions
    ```
-6. عيّن أول مدير يدوياً عبر Firebase Admin SDK / console (Cloud Function `setUserRole` تتطلب مديراً موجوداً مسبقاً لاستدعائها — هذا مقصود أمنياً).
+7. عيّن أول مدير يدوياً (Cloud Function `setUserRole` تتطلب مديراً موجوداً مسبقاً لاستدعائها — هذا مقصود أمنياً):
+   ```bash
+   node -e "
+   const admin = require('firebase-admin');
+   admin.initializeApp();
+   admin.auth().setCustomUserClaims('UID_المستخدم_هنا', { role: 'admin' })
+     .then(() => console.log('تم') );
+   "
+   ```
+   (احصل على UID من Firebase Console → Authentication → Users، بعد أن يسجّل ذلك المستخدم حساباً عادياً أولاً من التطبيق).
+8. **لتفعيل بناء CI مع Firebase**: أضف محتوى `android/app/google-services.json` كسرّ باسم `GOOGLE_SERVICES_JSON` في المستودع (Settings → Secrets and variables → Actions)، ثم فعّل السطر المُعلَّق في `.github/workflows/build.yml` الذي يكتبه قبل خطوة البناء، وأضف تطبيق Gradle plugin: `id("com.google.gms.google-services")` في `android/app/build.gradle` بعد توليده.
+
+بعد هذه الخطوات، البيانات كلها (منتجات، تصنيفات، طلبات، مستخدمين) تصبح حقيقية عبر Firestore،
+والمصادقة عبر Firebase Auth، بنفس الشاشات تماماً بلا أي تعديل إضافي.
 
 ## نموذج الأمان (مهم)
 

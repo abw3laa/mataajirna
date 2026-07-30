@@ -32,7 +32,8 @@ ios/Pods/
 ios/.symlinks/
 
 # Firebase (لا تُرفع مفاتيح حساسة)
-lib/firebase_options.dart
+# ملاحظة: lib/firebase_options.dart مرفوع عمداً (نسخة placeholder آمنة) —
+# سيستبدله flutterfire configure بالقيم الحقيقية لمشروعك عند ربط Firebase.
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 functions/node_modules/

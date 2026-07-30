@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/config/backend_config.dart';
 import '../data/catalog_repository.dart';
+import '../data/firestore_catalog_repository.dart';
 import '../data/mock_catalog_repository.dart';
 import '../domain/category.dart';
 import '../domain/product.dart';
 
-/// غيّر هذا إلى FirestoreCatalogRepository() عند ربط Firebase الفعلي.
-final catalogRepositoryProvider = Provider<CatalogRepository>((ref) => MockCatalogRepository());
+/// يبدّل تلقائياً بين Mock وFirestore حسب lib/core/config/backend_config.dart.
+final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
+  return kUseFirebase ? FirestoreCatalogRepository() : MockCatalogRepository();
+});
 
 final categoriesProvider = StreamProvider<List<ProductCategory>>((ref) {
   return ref.watch(catalogRepositoryProvider).watchCategories();
