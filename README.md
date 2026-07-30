@@ -13,13 +13,12 @@
 flutter --version   # تأكد أن لديك Flutter 3.22+ / Dart 3.3+
 flutter create --platforms=android --org com.matajirna .   # يولّد مجلد android/ رسمياً (غير مرفوع في المستودع عمداً)
 
-# تخصيص minSdk=30 واسم التطبيق — يتكيف تلقائياً سواء كانت نسختك تولّد
-# build.gradle (Groovy) أو build.gradle.kts (Kotlin DSL):
-if [ -f android/app/build.gradle.kts ]; then
-  sed -i '/defaultConfig {/a\        minSdk = 30' android/app/build.gradle.kts
-else
-  sed -i '/defaultConfig {/a\        minSdkVersion 30' android/app/build.gradle
-fi
+# تخصيص minSdk=30 واسم التطبيق (يتكيف تلقائياً مع أي صيغة Gradle، ويحذف
+# السطر الأصلي أياً كانت صيغته قبل إدراج قيمتنا، لتفادي تعارض له الأولوية):
+GRADLE_FILE=android/app/build.gradle.kts
+if [ ! -f "$GRADLE_FILE" ]; then GRADLE_FILE=android/app/build.gradle; fi
+sed -i -E '/^[[:space:]]*minSdk([[:space:]]*=|Version[[:space:]])/d' "$GRADLE_FILE"
+sed -i '/defaultConfig {/a\        minSdk = 30' "$GRADLE_FILE"
 sed -i 's/android:label="[^"]*"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
 
 flutter pub get
