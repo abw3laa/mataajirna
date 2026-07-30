@@ -5,9 +5,11 @@ import '../../../core/currency/currency_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_providers.dart';
 import '../domain/order.dart';
 import 'orders_providers.dart';
 
@@ -17,6 +19,20 @@ class OrdersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
+    final isGuest = ref.watch(authStateProvider).value == null;
+
+    if (isGuest) {
+      return Scaffold(
+        appBar: AppBar(title: Text(t.appName)),
+        body: EmptyView(
+          title: t.guestOrdersTitle,
+          subtitle: t.guestOrdersSubtitle,
+          icon: Icons.receipt_long_outlined,
+          action: PrimaryButton(label: t.login, onPressed: () => context.push('/login'), expand: false),
+        ),
+      );
+    }
+
     final ordersAsync = ref.watch(myOrdersProvider);
     final money = ref.watch(currencyFormatterProvider);
 

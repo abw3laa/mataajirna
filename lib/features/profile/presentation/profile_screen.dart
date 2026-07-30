@@ -25,39 +25,77 @@ class ProfileScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.marginMobile),
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.marginMobile),
+          if (user == null)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.marginMobile),
+                child: Column(
+                  children: [
+                    const CircleAvatar(
+                      radius: 32,
+                      backgroundColor: AppColors.surfaceContainer,
+                      child: Icon(Icons.person_outline_rounded, size: 32, color: AppColors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: AppSpacing.stackMd),
+                    Text(t.guestProfileTitle, style: AppTextStyles.headlineSm(), textAlign: TextAlign.center),
+                    const SizedBox(height: 4),
+                    Text(
+                      t.guestProfileSubtitle,
+                      style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    ElevatedButton(
+                      onPressed: () => context.push('/login'),
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
+                      child: Text(t.login),
+                    ),
+                    const SizedBox(height: AppSpacing.stackSm),
+                    OutlinedButton(
+                      onPressed: () => context.push('/register'),
+                      style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
+                      child: Text(t.createAccount),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.marginMobile),
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: AppColors.surfaceContainer,
+                      child: Text(
+                        user.name.isNotEmpty ? user.name[0] : '؟',
+                        style: AppTextStyles.headlineMd(),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.stackMd),
+                    Text(user.name, style: AppTextStyles.headlineSm()),
+                    const SizedBox(height: 4),
+                    Text(user.email, style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant)),
+                    const SizedBox(height: AppSpacing.stackMd),
+                    OutlinedButton(onPressed: () {}, style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 48)), child: Text(t.editProfile)),
+                  ],
+                ),
+              ),
+            ),
+          if (user != null) ...[
+            const SizedBox(height: AppSpacing.stackLg),
+            Card(
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.surfaceContainer,
-                    child: Text(
-                      (user?.name.isNotEmpty == true ? user!.name[0] : '؟'),
-                      style: AppTextStyles.headlineMd(),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.stackMd),
-                  Text(user?.name ?? '', style: AppTextStyles.headlineSm()),
-                  const SizedBox(height: 4),
-                  Text(user?.email ?? '', style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant)),
-                  const SizedBox(height: AppSpacing.stackMd),
-                  OutlinedButton(onPressed: () {}, style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 48)), child: Text(t.editProfile)),
+                  _tile(context, icon: Icons.location_on_outlined, label: t.savedAddresses, onTap: () {}),
+                  const Divider(height: 1),
+                  _tile(context, icon: Icons.help_outline_rounded, label: t.helpCenter, onTap: () {}),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.stackLg),
-          Card(
-            child: Column(
-              children: [
-                _tile(context, icon: Icons.location_on_outlined, label: t.savedAddresses, onTap: () {}),
-                const Divider(height: 1),
-                _tile(context, icon: Icons.help_outline_rounded, label: t.helpCenter, onTap: () {}),
-              ],
-            ),
-          ),
+          ],
           const SizedBox(height: AppSpacing.stackLg),
           Card(
             child: Padding(
@@ -106,20 +144,22 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.stackLg),
-          Card(
-            child: ListTile(
-              onTap: () async {
-                await ref.read(authRepositoryProvider).signOut();
-                if (context.mounted) context.go('/login');
-              },
-              leading: const CircleAvatar(
-                backgroundColor: AppColors.errorContainer,
-                child: Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
+          if (user != null) ...[
+            const SizedBox(height: AppSpacing.stackLg),
+            Card(
+              child: ListTile(
+                onTap: () async {
+                  await ref.read(authRepositoryProvider).signOut();
+                  if (context.mounted) context.go('/home');
+                },
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.errorContainer,
+                  child: Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
+                ),
+                title: Text(t.logout, style: AppTextStyles.bodyMd(color: AppColors.error), textAlign: TextAlign.right),
               ),
-              title: Text(t.logout, style: AppTextStyles.bodyMd(color: AppColors.error), textAlign: TextAlign.right),
             ),
-          ),
+          ],
         ],
       ),
     );

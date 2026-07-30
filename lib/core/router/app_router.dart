@@ -30,33 +30,51 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 /// تُفرض على الخادم** عبر Firestore Security Rules وCloud Functions التي
 /// تتحقق من custom claims الخاصة بالدور. لا تعتمد أبداً على هذا الراوتر
 /// وحده لحماية بيانات حسّاسة.
+///
+/// نموذج الوصول:
+/// - عامة بالكامل (تعمل كضيف بدون تسجيل دخول): الرئيسية، التصنيفات،
+///   تفاصيل المنتج، السلة (محلية على الجهاز).
+/// - "طلباتي" و"حسابي" و"التنبيهات": يبقيان متاحين للضيف ملاحياً (لا حجب
+///   على مستوى الراوتر)، لكن الشاشات نفسها تعرض دعوة لتسجيل الدخول بدل
+///   المحتوى إن كان المستخدم ضيفاً — تجربة أنعم من إعادة توجيه فجائية.
+/// - محمية فعلياً على مستوى الراوتر (لأنها إجراءات وليست مجرد عرض بيانات):
+///   `/checkout` ومسارات `/admin/*`.
+final _guestRequiresLoginPrefixes = ['/checkout', '/admin'];
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/login',
+    initialLocation: '/home',
     refreshListenable: _GoRouterRefreshStream(ref),
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull != null;
       final isLoading = authState.isLoading;
-      final loggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+      final path = state.matchedLocation;
+      final onAuthScreen = path == '/login' || path == '/register';
 
       if (isLoading) return null; // انتظر حتى تُحسم حالة المصادقة قبل التوجيه
 
-      if (!isLoggedIn && !loggingIn) return '/login';
-      if (isLoggedIn && loggingIn) {
-        final user = authState.value as AppUser;
-        return user.isAdmin ? '/admin' : '/home';
+      if (!isLoggedIn) {
+        final needsLogin = _guestRequiresLoginPrefixes.any((p) => path.startsWith(p));
+        if (needsLogin) {
+          // نحفظ الوجهة الأصلية كي تعيد شاشة الدخول المستخدم إليها بعد
+          // نجاح تسجيل الدخول مباشرة (مثال: السلة → checkout → login → checkout).
+          return '/login?redirect=${Uri.encodeComponent(state.uri.toString())}';
+        }
+        return null; // تصفح كضيف: مسموح بكل ما عدا ذلك
       }
 
-      if (isLoggedIn) {
-        final user = authState.value as AppUser;
-        final goingToAdmin = state.matchedLocation.startsWith('/admin');
-        // حماية واجهة فقط: تمنع مستخدماً عادياً من فتح شاشات الإدارة في
-        // العميل. القرار الفعلي والملزم يُتخذ في الخادم بغض النظر عن هذا الشرط.
-        if (goingToAdmin && !user.isAdmin) return '/home';
+      // من هنا فصاعداً: المستخدم مسجّل دخوله بالفعل.
+      final user = authState.value as AppUser;
+      if (onAuthScreen) {
+        return user.isAdmin ? '/admin' : '/home';
       }
+      final goingToAdmin = path.startsWith('/admin');
+      // حماية واجهة فقط: تمنع مستخدماً عادياً من فتح شاشات الإدارة في
+      // العميل. القرار الفعلي والملزم يُتخذ في الخادم بغض النظر عن هذا الشرط.
+      if (goingToAdmin && !user.isAdmin) return '/home';
       return null;
     },
     routes: [

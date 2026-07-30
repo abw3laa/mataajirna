@@ -23,7 +23,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.menu_rounded), onPressed: () => Scaffold.of(context).openDrawer()),
+        leading: IconButton(icon: const Icon(Icons.menu_rounded), onPressed: () => context.go('/profile')),
         title: Text(t.appName),
         actions: [
           IconButton(icon: const Icon(Icons.shopping_bag_outlined), onPressed: () => context.go('/cart')),
