@@ -16,8 +16,10 @@ class AppTheme {
       onSecondary: AppColors.onSecondary,
       secondaryContainer: AppColors.secondaryContainer,
       onSecondaryContainer: AppColors.onSecondaryContainer,
-      tertiary: AppColors.tertiary,
-      onTertiary: AppColors.onTertiary,
+      tertiary: AppColors.accent,
+      onTertiary: AppColors.onAccent,
+      tertiaryContainer: AppColors.accentContainer,
+      onTertiaryContainer: AppColors.onAccentContainer,
       error: AppColors.error,
       onError: AppColors.onError,
       errorContainer: AppColors.errorContainer,
@@ -34,12 +36,14 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
       fontFamily: AppTextStyles.bodyMd().fontFamily,
+      splashColor: AppColors.primary.withValues(alpha: 0.08),
+      highlightColor: AppColors.primary.withValues(alpha: 0.04),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: AppTextStyles.headlineSm(color: AppColors.primary),
+        titleTextStyle: AppTextStyles.headlineSm(color: AppColors.onSurface),
         iconTheme: const IconThemeData(color: AppColors.onSurface),
       ),
       cardTheme: CardThemeData(
@@ -47,7 +51,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: const BorderSide(color: Color(0xFFE0E0E0)),
+          side: const BorderSide(color: AppColors.outlineVariant),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -56,10 +60,8 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           minimumSize: const Size.fromHeight(56),
-          textStyle: AppTextStyles.labelMd(color: AppColors.onPrimary)
-              .copyWith(fontSize: 16),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md)),
+          textStyle: AppTextStyles.labelMd(color: AppColors.onPrimary).copyWith(fontSize: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
           elevation: 0,
         ),
       ),
@@ -68,15 +70,13 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           minimumSize: const Size.fromHeight(56),
           side: const BorderSide(color: AppColors.primary),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceContainerLowest,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: const BorderSide(color: AppColors.outlineVariant),
@@ -105,8 +105,7 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      dividerTheme:
-          const DividerThemeData(color: AppColors.outlineVariant, thickness: 1),
+      dividerTheme: const DividerThemeData(color: AppColors.outlineVariant, thickness: 1),
     );
   }
 }

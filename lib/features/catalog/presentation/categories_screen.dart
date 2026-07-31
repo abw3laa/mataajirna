@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/product_grid_skeleton.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../cart/presentation/cart_providers.dart';
@@ -121,7 +122,7 @@ class CategoriesScreen extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const LoadingView(),
+              loading: () => const ProductGridSkeleton(itemCount: 8, shrinkWrap: false),
               error: (e, _) => AppErrorView(
                 title: t.somethingWentWrong,
                 message: e.toString(),

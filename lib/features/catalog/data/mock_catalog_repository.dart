@@ -35,7 +35,7 @@ class MockCatalogRepository implements CatalogRepository {
       imageUrl: 'https://picsum.photos/seed/perfume1/600',
       inStock: true,
       badgeLabel: 'خصم',
-      badgeTone: BadgeTone.error,
+      badgeTone: BadgeTone.accent,
     ),
     const Product(
       id: 'p2',
@@ -73,7 +73,7 @@ class MockCatalogRepository implements CatalogRepository {
       imageUrl: 'https://picsum.photos/seed/watch1/600',
       inStock: true,
       badgeLabel: 'خصم 20%',
-      badgeTone: BadgeTone.error,
+      badgeTone: BadgeTone.accent,
     ),
     const Product(
       id: 'p5',
@@ -85,7 +85,7 @@ class MockCatalogRepository implements CatalogRepository {
       imageUrl: 'https://picsum.photos/seed/laptop1/600',
       inStock: true,
       badgeLabel: 'خصم 15%',
-      badgeTone: BadgeTone.error,
+      badgeTone: BadgeTone.accent,
     ),
     const Product(
       id: 'p6',

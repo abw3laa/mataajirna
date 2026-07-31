@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/product_grid_skeleton.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../cart/presentation/cart_providers.dart';
@@ -117,7 +118,10 @@ class HomeScreen extends ConsumerWidget {
                     },
                   );
                 },
-                loading: () => const Padding(padding: EdgeInsets.only(top: 40), child: LoadingView()),
+                loading: () => const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: ProductGridSkeleton(),
+                ),
                 error: (e, _) => AppErrorView(
                   title: t.somethingWentWrong,
                   message: e.toString(),

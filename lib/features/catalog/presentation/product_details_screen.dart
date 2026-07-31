@@ -49,10 +49,13 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     children: [
                       Stack(
                         children: [
-                          AspectRatio(
-                            aspectRatio: 1,
-                            child: CachedNetworkImage(
-                                imageUrl: product.imageUrl, fit: BoxFit.cover),
+                          Hero(
+                            tag: 'product-image-${product.id}',
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: CachedNetworkImage(
+                                  imageUrl: product.imageUrl, fit: BoxFit.cover),
+                            ),
                           ),
                           SafeArea(
                             child: Padding(

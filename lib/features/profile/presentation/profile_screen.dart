@@ -98,6 +98,10 @@ class ProfileScreen extends ConsumerWidget {
           ],
           const SizedBox(height: AppSpacing.stackLg),
           Card(
+            child: _tile(context, icon: Icons.info_outline_rounded, label: 'عن التطبيق', onTap: () => context.push('/about')),
+          ),
+          const SizedBox(height: AppSpacing.stackLg),
+          Card(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.marginMobile),
               child: Column(

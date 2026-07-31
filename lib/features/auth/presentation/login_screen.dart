@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/config/developer_info.dart';
 import '../../../core/storage/remember_me_store.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -75,14 +76,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       icon: const Icon(Icons.close_rounded),
                       tooltip: 'متابعة كضيف',
                     ),
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
-                      child: const Icon(Icons.storefront_rounded, color: Colors.white, size: 28),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: const Icon(Icons.storefront_rounded, color: Colors.white, size: 28),
+                        ),
+                        const SizedBox(height: 6),
+                        Text('By ${DeveloperInfo.name}', style: AppTextStyles.labelSm()),
+                      ],
                     ),
                   ],
                 ),

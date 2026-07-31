@@ -19,6 +19,7 @@ import '../../features/admin/dashboard/presentation/admin_dashboard_screen.dart'
 import '../../features/admin/orders/presentation/manage_orders_screen.dart';
 import '../../features/admin/products/presentation/manage_products_screen.dart';
 import '../../features/admin/products/presentation/product_form_screen.dart';
+import '../../features/about/presentation/about_screen.dart';
 import 'admin_shell.dart';
 import 'user_shell.dart';
 
@@ -123,6 +124,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/notifications',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/about',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AboutScreen(),
       ),
 
       // ---------- فرع المدير ----------

@@ -34,15 +34,18 @@ class ProductCard extends ConsumerWidget {
           children: [
             Stack(
               children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: CachedNetworkImage(
-                    imageUrl: product.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: AppColors.surfaceContainer),
-                    errorWidget: (_, __, ___) => Container(
-                      color: AppColors.surfaceContainer,
-                      child: const Icon(Icons.image_not_supported_outlined),
+                Hero(
+                  tag: 'product-image-${product.id}',
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: CachedNetworkImage(
+                      imageUrl: product.imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(color: AppColors.surfaceContainer),
+                      errorWidget: (_, __, ___) => Container(
+                        color: AppColors.surfaceContainer,
+                        child: const Icon(Icons.image_not_supported_outlined),
+                      ),
                     ),
                   ),
                 ),
