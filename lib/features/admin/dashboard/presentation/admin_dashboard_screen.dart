@@ -178,7 +178,7 @@ class _SalesTrendChart extends StatelessWidget {
                 Text('${_weeklySales.reduce((a, b) => a + b).toStringAsFixed(0)} ر.س',
                     style: AppTextStyles.labelMd(color: AppColors.onSurfaceVariant)),
                 const Spacer(),
-                const Text('مبيعات آخر 7 أيام', style: AppTextStyles.headlineSm()),
+                Text('مبيعات آخر 7 أيام', style: AppTextStyles.headlineSm()),
               ],
             ),
             const SizedBox(height: AppSpacing.stackMd),

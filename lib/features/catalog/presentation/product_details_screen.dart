@@ -336,7 +336,7 @@ class _ReviewsSection extends ConsumerWidget {
               child: const Text('أضف تقييمك'),
             ),
             const Spacer(),
-            const Text('التقييمات', style: AppTextStyles.headlineSm()),
+            Text('التقييمات', style: AppTextStyles.headlineSm()),
           ],
         ),
         const SizedBox(height: AppSpacing.stackSm),
@@ -425,7 +425,7 @@ class _ReviewsSection extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('أضف تقييمك', style: AppTextStyles.headlineSm(), textAlign: TextAlign.center),
+                  Text('أضف تقييمك', style: AppTextStyles.headlineSm(), textAlign: TextAlign.center),
                   const SizedBox(height: AppSpacing.stackMd),
                   StarRatingInput(value: rating, onChanged: (v) => setSheetState(() => rating = v)),
                   const SizedBox(height: AppSpacing.stackMd),
