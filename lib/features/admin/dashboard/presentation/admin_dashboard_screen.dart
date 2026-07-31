@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/currency/currency_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -41,6 +42,8 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.stackMd),
           _kpiCard(title: t.activeProducts, value: '845', icon: Icons.inventory_2_outlined, iconBg: const Color(0xFFF6E3CE)),
+          const SizedBox(height: AppSpacing.stackLg),
+          _SalesTrendChart(t: t),
           const SizedBox(height: AppSpacing.stackLg),
           Row(
             children: [
@@ -96,6 +99,16 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.stackSm),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => context.push('/admin/banners'),
+              icon: const Icon(Icons.campaign_outlined),
+              label: const Text('إدارة البانرات'),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
+            ),
+          ),
         ],
       ),
     );
@@ -137,5 +150,92 @@ class AdminDashboardScreen extends ConsumerWidget {
       OrderStatus.shipped => const StatusBadge(label: 'تم الشحن', tone: BadgeTone.info),
       OrderStatus.cancelled => const StatusBadge(label: 'ملغى', tone: BadgeTone.error),
     };
+  }
+}
+
+/// رسم بياني لاتجاه المبيعات آخر 7 أيام. القيم رقمية توضيحية حالياً
+/// (تُستبدل ببيانات حقيقية مجمّعة من مجموعة orders في Firestore عند الربط
+/// الفعلي). القيم تُعرض دوماً كنص، وليس بالاعتماد على اللون فقط، لتوافق
+/// إتاحة الوصول على الجوال (لا يوجد hover على اللمس).
+class _SalesTrendChart extends StatelessWidget {
+  const _SalesTrendChart({required this.t});
+  final AppLocalizations t;
+
+  static const _weeklySales = <double>[3200, 4100, 3800, 5200, 4700, 6100, 5230];
+  static const _days = ['سبت', 'أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'];
+
+  @override
+  Widget build(BuildContext context) {
+    final maxY = _weeklySales.reduce((a, b) => a > b ? a : b) * 1.2;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.marginMobile),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text('${_weeklySales.reduce((a, b) => a + b).toStringAsFixed(0)} ر.س',
+                    style: AppTextStyles.labelMd(color: AppColors.onSurfaceVariant)),
+                const Spacer(),
+                const Text('مبيعات آخر 7 أيام', style: AppTextStyles.headlineSm()),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            SizedBox(
+              height: 160,
+              child: LineChart(
+                LineChartData(
+                  minY: 0,
+                  maxY: maxY,
+                  gridData: const FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
+                  titlesData: FlTitlesData(
+                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          final i = value.toInt();
+                          if (i < 0 || i >= _days.length) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(_days[i], style: AppTextStyles.labelSm()),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (spots) => spots
+                          .map((s) => LineTooltipItem(
+                                '${s.y.toStringAsFixed(0)} ر.س',
+                                AppTextStyles.labelMd(color: Colors.white),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: [
+                        for (int i = 0; i < _weeklySales.length; i++) FlSpot(i.toDouble(), _weeklySales[i]),
+                      ],
+                      isCurved: true,
+                      color: AppColors.primary,
+                      barWidth: 3,
+                      dotData: const FlDotData(show: true),
+                      belowBarData: BarAreaData(show: true, color: AppColors.primaryContainer.withValues(alpha: 0.5)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -9,7 +9,11 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../cart/presentation/cart_providers.dart';
+import '../../notifications/domain/app_notification.dart';
+import '../../notifications/presentation/notifications_providers.dart';
 import '../../orders/presentation/orders_providers.dart';
+import '../domain/coupon.dart';
+import 'checkout_providers.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -20,16 +24,41 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _addressController = TextEditingController();
+  final _couponController = TextEditingController();
   bool _isPlacing = false;
+  String? _couponError;
+
+  void _applyCoupon() {
+    final coupon = CouponValidator.validate(_couponController.text);
+    setState(() {
+      if (coupon == null) {
+        _couponError = 'كود الخصم غير صالح';
+      } else {
+        _couponError = null;
+        ref.read(appliedCouponProvider.notifier).state = coupon;
+      }
+    });
+  }
 
   Future<void> _placeOrder() async {
     final items = ref.read(cartProvider);
     if (items.isEmpty) return;
     setState(() => _isPlacing = true);
     try {
-      final total = ref.read(cartTotalProvider);
-      await ref.read(ordersRepositoryProvider).placeOrder(items: items, total: total);
+      final total = ref.read(checkoutTotalProvider);
+      final order = await ref.read(ordersRepositoryProvider).placeOrder(items: items, total: total);
       ref.read(cartProvider.notifier).clear();
+      ref.read(appliedCouponProvider.notifier).state = null;
+      ref.read(notificationsProvider.notifier).addNotification(
+            AppNotification(
+              id: 'order-${order.id}',
+              title: 'تم استلام طلبك',
+              body: 'طلبك رقم #${order.id} قيد المعالجة الآن.',
+              type: NotificationType.orderUpdate,
+              timeAgo: 'الآن',
+              actionLabel: 'تتبع الطلب',
+            ),
+          );
       if (mounted) {
         context.go('/orders');
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إنشاء طلبك بنجاح ✓')));
@@ -43,7 +72,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final money = ref.watch(currencyFormatterProvider);
-    final total = ref.watch(cartTotalProvider);
+    final subtotal = ref.watch(cartSubtotalProvider);
+    final discount = ref.watch(couponDiscountProvider);
+    final total = ref.watch(checkoutTotalProvider);
+    final coupon = ref.watch(appliedCouponProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.checkout)),
@@ -64,6 +96,58 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     prefixIcon: Icons.location_on_outlined,
                     maxLines: 2,
                   ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.stackMd),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.marginMobile),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('كود الخصم', style: AppTextStyles.headlineSm(), textAlign: TextAlign.right),
+                  const SizedBox(height: AppSpacing.stackMd),
+                  if (coupon != null)
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.stackMd),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              ref.read(appliedCouponProvider.notifier).state = null;
+                              _couponController.clear();
+                            },
+                            child: const Icon(Icons.close_rounded, size: 18, color: AppColors.onPrimaryContainer),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'تم تطبيق كود ${coupon.code} (خصم ${coupon.discountPercent.toStringAsFixed(0)}%)',
+                            style: AppTextStyles.bodyMd(color: AppColors.onPrimaryContainer),
+                            textAlign: TextAlign.right,
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        ElevatedButton(onPressed: _applyCoupon, child: const Text('تطبيق')),
+                        const SizedBox(width: AppSpacing.stackSm),
+                        Expanded(
+                          child: AppTextField(hint: 'مثال: SAVE10', controller: _couponController),
+                        ),
+                      ],
+                    ),
+                  if (_couponError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(_couponError!, style: AppTextStyles.labelMd(color: AppColors.error)),
+                  ],
                 ],
               ),
             ),
@@ -105,12 +189,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.marginMobile),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(money.format(total),
-                      style: AppTextStyles.headlineSm(color: AppColors.primary)),
-                  Text(t.total, style: AppTextStyles.headlineSm()),
+                  _summaryRow(t.subtotal, money.format(subtotal)),
+                  if (discount > 0) ...[
+                    const SizedBox(height: 8),
+                    _summaryRow('الخصم', '- ${money.format(discount)}', color: AppColors.primary),
+                  ],
+                  const Divider(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(money.format(total), style: AppTextStyles.headlineSm(color: AppColors.primary)),
+                      Text(t.total, style: AppTextStyles.headlineSm()),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -119,6 +213,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           PrimaryButton(label: t.placeOrder, onPressed: _placeOrder, isLoading: _isPlacing),
         ],
       ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value, {Color? color}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(value, style: AppTextStyles.bodyMd(color: color)),
+        Text(label, style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant)),
+      ],
     );
   }
 }

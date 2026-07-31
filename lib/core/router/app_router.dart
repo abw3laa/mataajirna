@@ -16,10 +16,12 @@ import '../../features/orders/presentation/order_details_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/admin/dashboard/presentation/admin_dashboard_screen.dart';
+import '../../features/admin/banners/presentation/manage_banners_screen.dart';
 import '../../features/admin/orders/presentation/manage_orders_screen.dart';
 import '../../features/admin/products/presentation/manage_products_screen.dart';
 import '../../features/admin/products/presentation/product_form_screen.dart';
 import '../../features/about/presentation/about_screen.dart';
+import '../../features/favorites/presentation/favorites_screen.dart';
 import 'admin_shell.dart';
 import 'user_shell.dart';
 
@@ -130,6 +132,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const AboutScreen(),
       ),
+      GoRoute(
+        path: '/favorites',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const FavoritesScreen(),
+      ),
 
       // ---------- فرع المدير ----------
       StatefulShellRoute.indexedStack(
@@ -158,6 +165,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/admin/products/:id',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => ProductFormScreen(productId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: '/admin/banners',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ManageBannersScreen(),
       ),
     ],
   );

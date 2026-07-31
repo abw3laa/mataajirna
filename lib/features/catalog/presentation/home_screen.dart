@@ -9,6 +9,8 @@ import '../../../core/widgets/product_card.dart';
 import '../../../core/widgets/product_grid_skeleton.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../banners/domain/promo_banner.dart';
+import '../../banners/presentation/banners_providers.dart';
 import '../../cart/presentation/cart_providers.dart';
 import 'catalog_providers.dart';
 
@@ -27,6 +29,7 @@ class HomeScreen extends ConsumerWidget {
         leading: IconButton(icon: const Icon(Icons.menu_rounded), onPressed: () => context.go('/profile')),
         title: Text(t.appName),
         actions: [
+          IconButton(icon: const Icon(Icons.favorite_border_rounded), onPressed: () => context.push('/favorites')),
           IconButton(icon: const Icon(Icons.shopping_bag_outlined), onPressed: () => context.go('/cart')),
         ],
       ),
@@ -83,7 +86,7 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.stackLg),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
-              child: _PromoBanner(t: t),
+              child: _PromoBannerCarousel(t: t),
             ),
             const SizedBox(height: AppSpacing.stackLg),
             Padding(
@@ -137,9 +140,40 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _PromoBanner extends StatelessWidget {
-  const _PromoBanner({required this.t});
+class _PromoBannerCarousel extends ConsumerWidget {
+  const _PromoBannerCarousel({required this.t});
   final AppLocalizations t;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bannersAsync = ref.watch(activeBannersProvider);
+    return bannersAsync.when(
+      data: (banners) {
+        if (banners.isEmpty) return const SizedBox.shrink();
+        if (banners.length == 1) {
+          return _PromoBanner(t: t, banner: banners.first);
+        }
+        return SizedBox(
+          height: 180,
+          child: PageView.builder(
+            itemCount: banners.length,
+            itemBuilder: (context, i) => Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: _PromoBanner(t: t, banner: banners[i]),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _PromoBanner extends StatelessWidget {
+  const _PromoBanner({required this.t, required this.banner});
+  final AppLocalizations t;
+  final PromoBanner banner;
 
   @override
   Widget build(BuildContext context) {
@@ -159,11 +193,11 @@ class _PromoBanner extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.full)),
-              child: Text(t.specialOffer, style: AppTextStyles.labelSm(color: AppColors.primary)),
+              child: Text(banner.badgeLabel, style: AppTextStyles.labelSm(color: AppColors.primary)),
             ),
           ),
           Text(
-            'خصم يصل إلى 50%\nعلى الإلكترونيات',
+            banner.title,
             textAlign: TextAlign.right,
             style: AppTextStyles.headlineMd(color: Colors.white),
           ),
@@ -175,7 +209,7 @@ class _PromoBanner extends StatelessWidget {
               minimumSize: const Size(120, 40),
             ),
             onPressed: () {},
-            child: Text(t.shopNow),
+            child: Text(banner.ctaLabel),
           ),
         ],
       ),

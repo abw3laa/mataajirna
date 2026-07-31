@@ -6,11 +6,16 @@ import '../../../core/currency/currency_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/star_rating.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_providers.dart';
 import '../../cart/presentation/cart_providers.dart';
+import '../../favorites/presentation/favorites_providers.dart';
+import '../../reviews/presentation/reviews_providers.dart';
 import 'catalog_providers.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
@@ -40,6 +45,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 title: t.somethingWentWrong, icon: Icons.error_outline_rounded);
           }
           final hasDiscount = product.discountPrice != null;
+          final isFavorite = ref.watch(favoritesProvider).contains(product.id);
           return Column(
             children: [
               Expanded(
@@ -65,8 +71,13 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   _RoundIconButton(
-                                      icon: Icons.favorite_border_rounded,
-                                      onTap: () {}),
+                                      icon: isFavorite
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_border_rounded,
+                                      iconColor: isFavorite ? AppColors.accent : null,
+                                      onTap: () => ref
+                                          .read(favoritesProvider.notifier)
+                                          .toggle(product.id)),
                                   _RoundIconButton(
                                       icon: Icons.arrow_back_rounded,
                                       onTap: () => context.pop()),
@@ -122,6 +133,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                           style: AppTextStyles.bodyMd(
                                               color:
                                                   AppColors.onSurfaceVariant)),
+                                      const SizedBox(height: 4),
+                                      _AverageRatingLabel(productId: product.id),
                                     ],
                                   ),
                                 ),
@@ -200,6 +213,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             Text(product.description,
                                 style: AppTextStyles.bodyMd(),
                                 textAlign: TextAlign.right),
+                            const Divider(height: 32),
+                            _ReviewsSection(productId: product.id),
                           ],
                         ),
                       ),
@@ -282,10 +297,168 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   }
 }
 
+class _AverageRatingLabel extends ConsumerWidget {
+  const _AverageRatingLabel({required this.productId});
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviewsAsync = ref.watch(productReviewsProvider(productId));
+    final reviews = reviewsAsync.valueOrNull ?? const [];
+    if (reviews.isEmpty) return const SizedBox.shrink();
+    final avg = reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
+    return StarRating(rating: avg, size: 14);
+  }
+}
+
+class _ReviewsSection extends ConsumerWidget {
+  const _ReviewsSection({required this.productId});
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviewsAsync = ref.watch(productReviewsProvider(productId));
+    final isGuest = ref.watch(authStateProvider).value == null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            TextButton(
+              onPressed: () {
+                if (isGuest) {
+                  context.push('/login');
+                } else {
+                  _showAddReviewSheet(context, ref);
+                }
+              },
+              child: const Text('أضف تقييمك'),
+            ),
+            const Spacer(),
+            const Text('التقييمات', style: AppTextStyles.headlineSm()),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.stackSm),
+        reviewsAsync.when(
+          data: (reviews) {
+            if (reviews.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.stackMd),
+                child: Text('لا توجد تقييمات بعد — كن أول من يقيّم هذا المنتج',
+                    style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant),
+                    textAlign: TextAlign.center),
+              );
+            }
+            final avg = reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    StarRating(rating: avg, size: 20),
+                    const SizedBox(width: 8),
+                    Text('(${reviews.length} تقييم)', style: AppTextStyles.labelMd()),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.stackMd),
+                for (final review in reviews)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.stackMd),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.stackMd),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              StarRating(rating: review.rating.toDouble(), size: 14),
+                              const Spacer(),
+                              Text(review.userName,
+                                  style: AppTextStyles.bodyMd().copyWith(fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(review.comment, style: AppTextStyles.bodyMd(), textAlign: TextAlign.right),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+          loading: () => const Padding(
+            padding: EdgeInsets.all(AppSpacing.stackLg),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, __) => const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  void _showAddReviewSheet(BuildContext context, WidgetRef ref) {
+    int rating = 5;
+    final commentController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+      ),
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.marginMobile,
+            right: AppSpacing.marginMobile,
+            top: AppSpacing.marginMobile,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + AppSpacing.marginMobile,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setSheetState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('أضف تقييمك', style: AppTextStyles.headlineSm(), textAlign: TextAlign.center),
+                  const SizedBox(height: AppSpacing.stackMd),
+                  StarRatingInput(value: rating, onChanged: (v) => setSheetState(() => rating = v)),
+                  const SizedBox(height: AppSpacing.stackMd),
+                  AppTextField(hint: 'اكتب رأيك في المنتج...', controller: commentController, maxLines: 3),
+                  const SizedBox(height: AppSpacing.stackLg),
+                  PrimaryButton(
+                    label: 'إرسال التقييم',
+                    onPressed: () async {
+                      final user = ref.read(authStateProvider).value;
+                      await ref.read(reviewsRepositoryProvider).addReview(
+                            productId: productId,
+                            userName: user?.name ?? 'مستخدم',
+                            rating: rating,
+                            comment: commentController.text,
+                          );
+                      if (context.mounted) Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({required this.icon, required this.onTap});
+  const _RoundIconButton({required this.icon, required this.onTap, this.iconColor});
   final IconData icon;
   final VoidCallback onTap;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +467,7 @@ class _RoundIconButton extends StatelessWidget {
       customBorder: const CircleBorder(),
       child: CircleAvatar(
         backgroundColor: Colors.white.withValues(alpha: 0.9),
-        child: Icon(icon, color: AppColors.onSurface, size: 20),
+        child: Icon(icon, color: iconColor ?? AppColors.onSurface, size: 20),
       ),
     );
   }

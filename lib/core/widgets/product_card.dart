@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import '../../features/catalog/domain/product.dart';
+import '../../features/favorites/presentation/favorites_providers.dart';
 import 'status_badge.dart';
 
 class ProductCard extends ConsumerWidget {
@@ -55,6 +56,11 @@ class ProductCard extends ConsumerWidget {
                     right: 8,
                     child: StatusBadge(label: product.badgeLabel!, tone: product.badgeTone),
                   ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: _FavoriteButton(productId: product.id),
+                ),
               ],
             ),
             Padding(
@@ -112,6 +118,29 @@ class ProductCard extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FavoriteButton extends ConsumerWidget {
+  const _FavoriteButton({required this.productId});
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFavorite = ref.watch(favoritesProvider).contains(productId);
+    return InkWell(
+      onTap: () => ref.read(favoritesProvider.notifier).toggle(productId),
+      customBorder: const CircleBorder(),
+      child: CircleAvatar(
+        radius: 15,
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        child: Icon(
+          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          size: 16,
+          color: isFavorite ? AppColors.accent : AppColors.onSurfaceVariant,
         ),
       ),
     );

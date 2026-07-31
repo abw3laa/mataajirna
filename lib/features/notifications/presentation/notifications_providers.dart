@@ -41,6 +41,12 @@ class NotificationsNotifier extends StateNotifier<List<AppNotification>> {
   void markAllRead() {
     state = [for (final n in state) n.copyWith(isRead: true)];
   }
+
+  /// يُستدعى عند أحداث حقيقية (مثل إتمام طلب) لإضافة إشعار فوري بدل
+  /// الاكتفاء بالقائمة الثابتة التجريبية.
+  void addNotification(AppNotification notification) {
+    state = [notification, ...state];
+  }
 }
 
 final notificationsProvider = StateNotifierProvider<NotificationsNotifier, List<AppNotification>>(
