@@ -140,8 +140,13 @@ jobs:
             echo "لا تغييرات في android/ — تخطي الرفع."
           else
             git commit -m "chore: تحديث مجلد android المولَّد تلقائياً عبر flutter create [skip ci]"
-            git pull --rebase origin main
-            git push origin HEAD:main
+            # دفع مباشر (fast-forward متوقَّع لأننا بدأنا من رأس main نفسه في
+            # هذا التشغيل). لا نستخدم pull --rebase لأن الاستنساخ ضحل
+            # (fetch-depth: 1 افتراضياً) وقد يسبب مشاكل مع rebase. إن فشل
+            # الدفع بسبب سباق نادر مع دفعة أخرى متزامنة، نكتفي بتسجيل ذلك
+            # دون إفشال الـ workflow بالكامل — نسخة android/ من آخر تشغيل
+            # ناجح تبقى موجودة في المستودع على أي حال.
+            git push origin HEAD:main || echo "⚠️ تعذّر دفع مجلد android (على الأرجح تعديل متزامن) — تجاهل غير حرج."
           fi
 
       # ⚠️ ملاحظة: إن ربطت Firebase لاحقاً، يجب رفع google-services.json كسرّ
