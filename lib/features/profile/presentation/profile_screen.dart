@@ -162,13 +162,15 @@ class ProfileScreen extends ConsumerWidget {
                         },
                       ),
                       const Spacer(),
-                      const Text('المظهر', style: AppTextStyles.labelMd()),
+                      Text('المظهر', style: AppTextStyles.labelMd()),
                     ],
                   ),
                 ],
               ),
             ),
           ),
+          if (user != null) ...[
+            const SizedBox(height: AppSpacing.stackLg),
             Card(
               child: ListTile(
                 onTap: () async {
