@@ -71,6 +71,8 @@ jobs:
     name: بناء تطبيق أندرويد (APK)
     runs-on: ubuntu-latest
     needs: analyze
+    permissions:
+      contents: write # مطلوبة لدفع مجلد android المولَّد تلقائياً إلى المستودع
     steps:
       - name: استنساخ المستودع
         uses: actions/checkout@v4
@@ -123,6 +125,24 @@ jobs:
           sed -i 's/android:label="[^"]*"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
           echo "== AndroidManifest.xml =="
           cat android/app/src/main/AndroidManifest.xml
+
+      # لا نملك Flutter SDK محلياً لتشغيل flutter create، لذا يتولى CI توليد
+      # مجلد android وتخصيصه (الخطوتان أعلاه)، ثم يدفعه هنا تلقائياً إلى
+      # المستودع باستخدام صلاحيات GITHUB_TOKEN المدمجة — لا حاجة لأي سرّ
+      # إضافي. [skip ci] في رسالة الـ commit يمنع تشغيل الـ workflow من جديد
+      # على هذه الدفعة نفسها (تفادي حلقة لا نهائية).
+      - name: رفع مجلد android المولَّد إلى المستودع
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f android
+          if git diff --cached --quiet; then
+            echo "لا تغييرات في android/ — تخطي الرفع."
+          else
+            git commit -m "chore: تحديث مجلد android المولَّد تلقائياً عبر flutter create [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
 
       # ⚠️ ملاحظة: إن ربطت Firebase لاحقاً، يجب رفع google-services.json كسرّ
       # (Secret) في المستودع وكتابته هنا قبل خطوة البناء، مثال:

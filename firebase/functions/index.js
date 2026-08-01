@@ -25,6 +25,35 @@ function assertIsAdmin(context) {
   }
 }
 
+/** يسمح بـ admin أو manager (لعمليات إدارة المنتجات/الطلبات اليومية، وليس
+ * العمليات الحسّاسة كتغيير الأدوار التي تبقى admin فقط). */
+function assertIsAdminOrManager(context) {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'يجب تسجيل الدخول.');
+  }
+  const role = context.auth.token.role;
+  if (role !== 'admin' && role !== 'manager') {
+    throw new functions.https.HttpsError('permission-denied', 'هذه العملية مخصصة للمدراء والمشرفين فقط.');
+  }
+}
+
+/**
+ * writeAuditLog — سجل تدقيق مركزي لكل عملية إدارية حساسة (من عدّل ماذا
+ * ومتى). مجموعة `auditLogs` للقراءة من قبل المدير فقط (Firestore Rules)،
+ * والكتابة فيها تتم فقط من الخادم (Cloud Functions / Admin SDK) — لا يمكن
+ * للعميل تلفيق سجل تدقيق مزيّف عن نفسه أبداً.
+ */
+async function writeAuditLog({ action, targetType, targetId, actorUid, details }) {
+  await db.collection('auditLogs').add({
+    action,
+    targetType,
+    targetId,
+    actorUid: actorUid || null,
+    details: details || null,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 /**
  * createOrder — نقطة الإنشاء الرسمية الوحيدة للطلبات.
  *
@@ -130,31 +159,46 @@ exports.createOrder = functions.https.onCall(async (data, context) => {
 });
 
 /**
- * setUserRole — الدالة الوحيدة المسموح لها بتعيين دور "admin" لمستخدم.
- * تُستدعى فقط من قبل مدير موجود مسبقاً (bootstrap أول مدير يتم عبر
- * Firebase Admin SDK/console مباشرة، وليس عبر هذه الدالة).
+ * setUserRole — الدالة الوحيدة المسموح لها بتعيين دور لمستخدم.
+ * تُستدعى فقط من قبل مدير (admin) موجود مسبقاً — bootstrap أول admin يتم
+ * عبر Firebase Admin SDK/console مباشرة، وليس عبر هذه الدالة.
+ *
+ * ثلاثة أدوار مدعومة الآن (نظام صلاحيات متعدد المستويات):
+ *   - 'admin'   : كل الصلاحيات، بما فيها تعيين أدوار مستخدمين آخرين.
+ *   - 'manager' : يدير المنتجات والطلبات والبانرات، لكن لا يستطيع تعيين
+ *                 أدوار أو الوصول لإعدادات حسّاسة أخرى.
+ *   - 'user'    : عميل عادي (الافتراضي).
+ * فقط admin يستطيع استدعاء هذه الدالة أصلاً (assertIsAdmin) — حتى لو أراد
+ * manager ترقية شخص آخر لـ manager، يُرفض طلبه هنا.
  */
 exports.setUserRole = functions.https.onCall(async (data, context) => {
   assertIsAdmin(context);
 
   const { uid, role } = data;
-  if (!uid || !['admin', 'user'].includes(role)) {
-    throw new functions.https.HttpsError('invalid-argument', 'uid و role (admin|user) مطلوبان.');
+  if (!uid || !['admin', 'manager', 'user'].includes(role)) {
+    throw new functions.https.HttpsError('invalid-argument', 'uid وrole (admin|manager|user) مطلوبان.');
   }
 
   await admin.auth().setCustomUserClaims(uid, { role });
   await db.collection('users').doc(uid).set({ roleUpdatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
 
+  await writeAuditLog({
+    action: 'role_changed',
+    targetType: 'user',
+    targetId: uid,
+    actorUid: context.auth.uid,
+    details: { newRole: role },
+  });
+
   return { success: true };
 });
 
 /**
- * updateOrderStatus — تحديث حالة طلب من قبل المدير، مع تسجيل سجل تدقيق.
- * يُفضَّل استخدام هذه الدالة بدلاً من كتابة مباشرة على المستند من العميل،
- * رغم أن Firestore Rules تمنع أي تحديث من غير المدير على أي حال.
+ * updateOrderStatus — تحديث حالة طلب من قبل مدير أو مشرف (admin/manager)،
+ * مع تسجيل سجل تدقيق.
  */
 exports.updateOrderStatus = functions.https.onCall(async (data, context) => {
-  assertIsAdmin(context);
+  assertIsAdminOrManager(context);
 
   const { orderId, status } = data;
   const validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
@@ -170,6 +214,14 @@ exports.updateOrderStatus = functions.https.onCall(async (data, context) => {
       changedBy: context.auth.uid,
       changedAt: new Date().toISOString(),
     }),
+  });
+
+  await writeAuditLog({
+    action: 'order_status_changed',
+    targetType: 'order',
+    targetId: orderId,
+    actorUid: context.auth.uid,
+    details: { newStatus: status },
   });
 
   return { success: true };
@@ -195,4 +247,28 @@ exports.onOrderCreated = functions.firestore
         isRead: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
+  });
+
+/**
+ * onProductWrite — يسجّل تلقائياً في auditLogs كل إنشاء/تعديل/حذف لمنتج،
+ * بصرف النظر عن كون الكتابة جاءت من شاشة "إضافة منتج" أو "تعديل منتج"
+ * (كلاهما يكتب مباشرة على Firestore من العميل، وليس عبر Cloud Function
+ * مخصصة). المصدر الوحيد لهوية الفاعل هنا هو حقل `updatedBy` الذي تفرضه
+ * Firestore Rules أن يطابق دوماً uid المدير الحالي — لا يمكن انتحاله.
+ */
+exports.onProductWrite = functions.firestore
+  .document('products/{productId}')
+  .onWrite(async (change, context) => {
+    const after = change.after.exists ? change.after.data() : null;
+    const before = change.before.exists ? change.before.data() : null;
+    const action = !before ? 'product_created' : !after ? 'product_deleted' : 'product_updated';
+    const actorUid = (after && after.updatedBy) || (before && before.updatedBy) || null;
+
+    await writeAuditLog({
+      action,
+      targetType: 'product',
+      targetId: context.params.productId,
+      actorUid,
+      details: after ? { name: after.name, price: after.price } : null,
+    });
   });

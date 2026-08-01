@@ -6,10 +6,11 @@ rules_version = '2';
 // ولا يُعتد به أمنياً. كل قراءة/كتابة تُعاد التحقق منها هنا بغض النظر عمّا
 // يُرسله العميل.
 //
-// الدور (admin/user) يُقرأ حصراً من request.auth.token.role، وهو custom
-// claim على Firebase Auth ID Token، يُضبط فقط عبر Cloud Function محمية
-// (انظر functions/index.js -> setUserRole). لا توجد أي وسيلة للعميل
-// لتعديل هذا الحقل مباشرة.
+// الدور يُقرأ حصراً من request.auth.token.role، وهو custom claim على
+// Firebase Auth ID Token، يُضبط فقط عبر Cloud Function محمية (انظر
+// functions/index.js -> setUserRole). لا توجد أي وسيلة للعميل لتعديل هذا
+// الحقل مباشرة. ثلاثة أدوار: 'admin' (كل الصلاحيات)، 'manager' (يدير
+// المنتجات/الطلبات/البانرات فقط، لا يدير المستخدمين أو الأدوار)، 'user'.
 // ============================================================================
 
 function isSignedIn() {
@@ -18,6 +19,10 @@ function isSignedIn() {
 
 function isAdmin() {
   return isSignedIn() && request.auth.token.role == 'admin';
+}
+
+function isManagerOrAdmin() {
+  return isSignedIn() && (request.auth.token.role == 'admin' || request.auth.token.role == 'manager');
 }
 
 function isOwner(userId) {
@@ -48,12 +53,17 @@ service cloud.firestore {
 
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      // updatedBy يجب أن يطابق هوية الفاعل الفعلي دوماً — يمنع انتحال هوية
+      // مدير/مشرف آخر في سجل التدقيق (auditLogs). Manager يشارك admin في
+      // إدارة الكتالوج اليومية (إضافة/تعديل/حذف منتجات).
+      allow create, update: if isManagerOrAdmin()
+                            && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if isManagerOrAdmin();
     }
 
     match /banners/{bannerId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isManagerOrAdmin();
     }
 
     // ---------------- السلة ----------------
@@ -74,10 +84,19 @@ service cloud.firestore {
     // عبر Cloud Function `createOrder` (Admin SDK يتجاوز هذه القاعدة عمداً)،
     // والتي تعيد حساب كل سعر من مستندات `products` الحقيقية على الخادم.
     match /orders/{orderId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow read: if isManagerOrAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if false;
-      allow update: if isAdmin(); // العميل لا يعدّل حالة الطلب مباشرة أبداً
+      allow update: if isManagerOrAdmin(); // العميل لا يعدّل حالة الطلب مباشرة أبداً
       allow delete: if false;
+    }
+
+    // ---------------- سجل التدقيق (Audit Log) ----------------
+    // يُكتب فقط من الخادم (Cloud Functions/Triggers عبر Admin SDK يتجاوز
+    // هذه القاعدة عمداً). القراءة لـ admin فقط — أداة رقابة حسّاسة، ليست
+    // ضرورية لعمل manager اليومي.
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // ---------------- الكوبونات ----------------

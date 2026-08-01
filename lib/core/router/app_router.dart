@@ -72,12 +72,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // من هنا فصاعداً: المستخدم مسجّل دخوله بالفعل.
       final user = authState.value as AppUser;
       if (onAuthScreen) {
-        return user.isAdmin ? '/admin' : '/home';
+        return user.isAdminOrManager ? '/admin' : '/home';
       }
       final goingToAdmin = path.startsWith('/admin');
       // حماية واجهة فقط: تمنع مستخدماً عادياً من فتح شاشات الإدارة في
-      // العميل. القرار الفعلي والملزم يُتخذ في الخادم بغض النظر عن هذا الشرط.
-      if (goingToAdmin && !user.isAdmin) return '/home';
+      // العميل (admin أو manager مسموح لهما). القرار الفعلي والملزم يُتخذ
+      // في الخادم بغض النظر عن هذا الشرط.
+      if (goingToAdmin && !user.isAdminOrManager) return '/home';
       return null;
     },
     routes: [

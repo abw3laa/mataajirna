@@ -7,6 +7,7 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/theme_mode_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_providers.dart';
 
@@ -19,6 +20,7 @@ class ProfileScreen extends ConsumerWidget {
     final user = ref.watch(authStateProvider).value;
     final locale = ref.watch(localeProvider);
     final currency = ref.watch(currencyProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.appName)),
@@ -144,12 +146,29 @@ class ProfileScreen extends ConsumerWidget {
                       Text(t.currency, style: AppTextStyles.labelMd()),
                     ],
                   ),
+                  const SizedBox(height: AppSpacing.stackMd),
+                  Row(
+                    children: [
+                      DropdownButton<ThemeMode>(
+                        value: themeMode,
+                        underline: const SizedBox.shrink(),
+                        items: const [
+                          DropdownMenuItem(value: ThemeMode.system, child: Text('حسب النظام')),
+                          DropdownMenuItem(value: ThemeMode.light, child: Text('فاتح')),
+                          DropdownMenuItem(value: ThemeMode.dark, child: Text('داكن')),
+                        ],
+                        onChanged: (v) {
+                          if (v != null) ref.read(themeModeProvider.notifier).setThemeMode(v);
+                        },
+                      ),
+                      const Spacer(),
+                      const Text('المظهر', style: AppTextStyles.labelMd()),
+                    ],
+                  ),
                 ],
               ),
             ),
           ),
-          if (user != null) ...[
-            const SizedBox(height: AppSpacing.stackLg),
             Card(
               child: ListTile(
                 onTap: () async {

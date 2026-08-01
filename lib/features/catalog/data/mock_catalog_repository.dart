@@ -191,6 +191,23 @@ class MockCatalogRepository implements CatalogRepository {
   }
 
   @override
+  Future<ProductsPage> fetchProductsPage({int limit = 20, String? cursor}) async {
+    await Future.delayed(const Duration(milliseconds: 200)); // يحاكي زمن شبكة حقيقياً
+    int startIndex = 0;
+    if (cursor != null) {
+      final idx = _products.indexWhere((p) => p.id == cursor);
+      startIndex = idx == -1 ? 0 : idx + 1;
+    }
+    final page = _products.skip(startIndex).take(limit).toList();
+    final hasMore = startIndex + page.length < _products.length;
+    return ProductsPage(
+      items: page,
+      nextCursor: page.isEmpty ? null : page.last.id,
+      hasMore: hasMore,
+    );
+  }
+
+  @override
   Future<void> upsertProduct(Product product) async {
     // ⚠️ هذا مسموح هنا فقط لأنه Mock للتطوير. في الإنتاج هذا الاستدعاء
     // يذهب عبر Cloud Function/Firestore ويُرفض من الخادم إن لم يكن

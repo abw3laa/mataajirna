@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../domain/category.dart';
 import '../domain/product.dart';
@@ -10,10 +11,12 @@ import 'catalog_repository.dart';
 /// الكتابة (`upsertProduct`/`deleteProduct`) تُقبل من الخادم فقط لمن يحمل
 /// `role == admin` — التحقق الفعلي في Firestore Rules، وليس في هذا الكود.
 class FirestoreCatalogRepository implements CatalogRepository {
-  FirestoreCatalogRepository({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+  FirestoreCatalogRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _db = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
 
   @override
   Stream<List<ProductCategory>> watchCategories() {
@@ -50,6 +53,24 @@ class FirestoreCatalogRepository implements CatalogRepository {
   }
 
   @override
+  Future<ProductsPage> fetchProductsPage({int limit = 20, String? cursor}) async {
+    Query<Map<String, dynamic>> query = _db
+        .collection('products')
+        .orderBy(FieldPath.documentId)
+        .limit(limit);
+    if (cursor != null) {
+      query = query.startAfter([cursor]);
+    }
+    final snap = await query.get();
+    final items = snap.docs.map(_productFromDoc).toList();
+    return ProductsPage(
+      items: items,
+      nextCursor: items.isEmpty ? null : snap.docs.last.id,
+      hasMore: items.length == limit,
+    );
+  }
+
+  @override
   Future<void> upsertProduct(Product product) async {
     await _db.collection('products').doc(product.id).set({
       'name': product.name,
@@ -65,6 +86,10 @@ class FirestoreCatalogRepository implements CatalogRepository {
       'badgeLabel': product.badgeLabel,
       'badgeTone': product.badgeTone.name,
       'updatedAt': FieldValue.serverTimestamp(),
+      // من عدّل هذا المستند — تلتقطه Cloud Function `onProductWrite` لتسجيله
+      // في سجل التدقيق (auditLogs). Firestore Rules تفرض أن يطابق دائماً
+      // uid المدير الحالي (لا يمكن انتحال هوية مدير آخر هنا).
+      'updatedBy': _auth.currentUser?.uid,
     }, SetOptions(merge: true));
   }
 

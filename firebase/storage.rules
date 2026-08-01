@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// قواعد أمان Firebase Storage — طبقة الفرض الفعلية لرفع الصور، بنفس منطق
+// Firestore Rules (لا ثقة بالعميل، التحقق من الدور عبر custom claims فقط).
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // صور المنتجات: قراءة عامة (تظهر في المتجر للجميع)، رفع/تعديل/حذف
+    // للمدير فقط. حد أقصى 5MB لكل صورة (حماية من استنزاف التخزين)، ونوع
+    // الملف يجب أن يكون صورة فعلياً.
+    match /products/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.token.role == 'admin'
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // أي مسار آخر غير مذكور صراحة: مرفوض بالكامل (الوضع الافتراضي في
+    // Firebase Storage أصلاً هو الرفض، لكن نُصرِّح به هنا للوضوح والتدقيق).
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

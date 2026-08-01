@@ -50,3 +50,49 @@ class AppColors {
   static const warningContainer = Color(0xFFFCEBD3);
   static const info = secondary;
 }
+
+/// نسخة داكنة من نفس الهوية — نفس منطق الألوان (زمردي/مرجاني/بنفسجي) لكن
+/// مُعاد ضبطها للتباين والراحة البصرية في الإضاءة المنخفضة.
+class AppColorsDark {
+  AppColorsDark._();
+
+  static const primary = Color(0xFF34D399); // أخضر زمردي أفتح ليتباين على الداكن
+  static const onPrimary = Color(0xFF00391F);
+  static const primaryContainer = Color(0xFF00512B);
+  static const onPrimaryContainer = Color(0xFFB7F5D8);
+
+  static const secondary = Color(0xFF9C97FF);
+  static const onSecondary = Color(0xFF201C6B);
+  static const secondaryContainer = Color(0xFF433DAE);
+  static const onSecondaryContainer = Color(0xFFE6E4FF);
+
+  static const accent = Color(0xFFFF8A6E);
+  static const onAccent = Color(0xFF4A1103);
+  static const accentContainer = Color(0xFF8A2A0F);
+  static const onAccentContainer = Color(0xFFFFE1D6);
+
+  static const error = Color(0xFFFF6F61);
+  static const onError = Color(0xFF4A0E08);
+  static const errorContainer = Color(0xFF8A1C12);
+  static const onErrorContainer = Color(0xFFFFE1DC);
+
+  static const surface = Color(0xFF17181A);
+  static const surfaceContainerLowest = Color(0xFF0F1011);
+  static const surfaceContainerLow = Color(0xFF1D1E20);
+  static const surfaceContainer = Color(0xFF212224);
+  static const surfaceContainerHigh = Color(0xFF2B2C2E);
+  static const surfaceContainerHighest = Color(0xFF363739);
+
+  static const onSurface = Color(0xFFEDEDE7);
+  static const onSurfaceVariant = Color(0xFFC2C4BA);
+  static const outline = Color(0xFF8C8F82);
+  static const outlineVariant = Color(0xFF44453F);
+
+  static const background = surface;
+  static const onBackground = onSurface;
+
+  static const success = primary;
+  static const warning = Color(0xFFE8A857);
+  static const warningContainer = Color(0xFF4A3315);
+  static const info = secondary;
+}
