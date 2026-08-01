@@ -26,6 +26,110 @@ function assertIsAdmin(context) {
 }
 
 /**
+ * createOrder — نقطة الإنشاء الرسمية الوحيدة للطلبات.
+ *
+ * ⚠️ هذه الدالة هي إصلاح أمني جوهري: العميل (تطبيق الجوال) لا يُرسل السعر
+ * الإجمالي إطلاقاً. يُرسل فقط قائمة (productId + quantity)، والخادم هو من:
+ *   1. يجلب السعر الحقيقي الحالي لكل منتج من Firestore مباشرة (وليس مما
+ *      يدّعيه العميل) — يمنع التلاعب بالسعر عبر تعديل الطلب الشبكي.
+ *   2. يتحقق من وجود المنتج وتوفره في المخزون.
+ *   3. يتحقق من صلاحية كود الخصم (إن وُجد) من مجموعة `coupons` في الخادم
+ *      فقط — العميل لا يقرأ مجموعة الكوبونات مطلقاً (Firestore Rules تمنعه).
+ *   4. يحسب الضريبة والإجمالي بنفسه، ثم يكتب المستند الرسمي للطلب.
+ *
+ * Firestore Rules تمنع أي كتابة مباشرة من العميل على مجموعة orders تماماً
+ * (`allow create: if false`) — الطريق الوحيد لإنشاء طلب هو هذه الدالة.
+ */
+const TAX_RATE = 0.15;
+
+exports.createOrder = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'يجب تسجيل الدخول لإنشاء طلب.');
+  }
+
+  const { items, couponCode, address } = data;
+  if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
+    throw new functions.https.HttpsError('invalid-argument', 'قائمة عناصر الطلب غير صالحة.');
+  }
+  // تنظيف بسيط للعنوان: نص فقط، بحد أقصى معقول للطول (يمنع إدخالات ضخمة
+  // عبثية أو محاولات حقن بيانات كبيرة داخل المستند).
+  const cleanAddress = typeof address === 'string' ? address.trim().slice(0, 300) : null;
+
+  // 1) إعادة بناء كل عنصر من مصدر الحقيقة (Firestore)، وليس مما أرسله العميل.
+  let subtotal = 0;
+  const resolvedItems = [];
+  for (const rawItem of items) {
+    const productId = rawItem && rawItem.productId;
+    const quantity = Number(rawItem && rawItem.quantity);
+    if (!productId || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
+      throw new functions.https.HttpsError('invalid-argument', 'عنصر طلب غير صالح.');
+    }
+
+    const productSnap = await db.collection('products').doc(productId).get();
+    if (!productSnap.exists) {
+      throw new functions.https.HttpsError('not-found', `المنتج ${productId} غير موجود.`);
+    }
+    const product = productSnap.data();
+    if (product.inStock === false) {
+      throw new functions.https.HttpsError('failed-precondition', `المنتج "${product.name}" نفد من المخزون.`);
+    }
+
+    const unitPrice = typeof product.discountPrice === 'number' ? product.discountPrice : product.price;
+    subtotal += unitPrice * quantity;
+    resolvedItems.push({
+      productId,
+      name: product.name,
+      imageUrl: product.imageUrl || '',
+      unitPrice,
+      quantity,
+      selectedColor: rawItem.selectedColor || null,
+    });
+  }
+
+  // 2) التحقق من الكوبون على الخادم فقط (العميل لا يعرف قيمة الخصم الحقيقية
+  // ولا يقرأ مجموعة coupons إطلاقاً).
+  let discount = 0;
+  let appliedCouponCode = null;
+  if (couponCode) {
+    const couponSnap = await db.collection('coupons').doc(String(couponCode).toUpperCase()).get();
+    if (couponSnap.exists) {
+      const coupon = couponSnap.data();
+      const notExpired = !coupon.expiresAt || coupon.expiresAt.toDate() > new Date();
+      if (coupon.isActive && notExpired) {
+        discount = subtotal * ((coupon.discountPercent || 0) / 100);
+        appliedCouponCode = couponSnap.id;
+      }
+    }
+    // كود غير صالح؟ نتجاهله بصمت (نفس سلوك عدم إدخال كود) بدل كشف السبب،
+    // لمنع استكشاف الأكواد الصحيحة عبر تجربة قيم مختلفة (brute force).
+  }
+
+  const taxableAmount = subtotal - discount;
+  const tax = taxableAmount * TAX_RATE;
+  const total = Math.round((taxableAmount + tax) * 100) / 100;
+
+  // 3) كتابة المستند الرسمي — الخادم فقط، عبر Admin SDK (يتجاوز Firestore
+  // Rules عمداً لأنه هو نفسه مصدر الفرض الأمني هنا).
+  const orderRef = db.collection('orders').doc();
+  const orderData = {
+    userId: context.auth.uid,
+    customerName: (context.auth.token.name || context.auth.token.email || '').toString(),
+    items: resolvedItems,
+    subtotal,
+    discount,
+    couponCode: appliedCouponCode,
+    tax,
+    total,
+    address: cleanAddress,
+    status: 'pending',
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  await orderRef.set(orderData);
+
+  return { orderId: orderRef.id, subtotal, discount, tax, total };
+});
+
+/**
  * setUserRole — الدالة الوحيدة المسموح لها بتعيين دور "admin" لمستخدم.
  * تُستدعى فقط من قبل مدير موجود مسبقاً (bootstrap أول مدير يتم عبر
  * Firebase Admin SDK/console مباشرة، وليس عبر هذه الدالة).

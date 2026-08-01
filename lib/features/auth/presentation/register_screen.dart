@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/app_exception.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -23,11 +25,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmController = TextEditingController();
   bool _isLoading = false;
   String? _error;
+  bool _errorIsInfo = false;
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_passwordController.text != _confirmController.text) {
-      setState(() => _error = 'كلمتا المرور غير متطابقتين');
+      setState(() {
+        _error = 'كلمتا المرور غير متطابقتين';
+        _errorIsInfo = false;
+      });
       return;
     }
     setState(() {
@@ -41,7 +47,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: _passwordController.text,
           );
     } catch (e) {
-      setState(() => _error = 'تعذّر إنشاء الحساب، حاول مجدداً');
+      final isInfo = AppException.isInformational(e);
+      setState(() {
+        _error = AppException.friendlyMessage(e);
+        _errorIsInfo = isInfo;
+      });
+      // نجاح التسجيل الفعلي يصل هنا كاستثناء "معلوماتي" (بانتظار تأكيد
+      // البريد) — نعيد المستخدم لشاشة الدخول تلقائياً بعد لحظة ليقرأ الرسالة.
+      if (isInfo && mounted) {
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) context.pop();
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -91,7 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.stackSm),
-                  Text(_error!, style: AppTextStyles.labelMd(color: AppColors.error)),
+                  Text(_error!, style: AppTextStyles.labelMd(color: _errorIsInfo ? AppColors.primary : AppColors.error)),
                 ],
                 const SizedBox(height: 32),
                 PrimaryButton(label: t.register, onPressed: _submit, isLoading: _isLoading),

@@ -5,6 +5,8 @@ import '../../../core/currency/currency_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/app_exception.dart';
+import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -23,6 +25,7 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 }
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
   final _couponController = TextEditingController();
   bool _isPlacing = false;
@@ -41,12 +44,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    if (!_formKey.currentState!.validate()) return;
     final items = ref.read(cartProvider);
     if (items.isEmpty) return;
     setState(() => _isPlacing = true);
     try {
-      final total = ref.read(checkoutTotalProvider);
-      final order = await ref.read(ordersRepositoryProvider).placeOrder(items: items, total: total);
+      final coupon = ref.read(appliedCouponProvider);
+      final order = await ref.read(ordersRepositoryProvider).placeOrder(
+            items: items,
+            couponCode: coupon?.code,
+            address: Validators.sanitize(_addressController.text),
+          );
       ref.read(cartProvider.notifier).clear();
       ref.read(appliedCouponProvider.notifier).state = null;
       ref.read(notificationsProvider.notifier).addNotification(
@@ -62,6 +70,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (mounted) {
         context.go('/orders');
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إنشاء طلبك بنجاح ✓')));
+      }
+    } catch (e) {
+      // لا نعرض رسالة الاستثناء الخام (قد تحتوي تفاصيل تقنية أو داخلية) —
+      // AppException.friendlyMessage يترجمها لرسالة مفهومة للمستخدم.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppException.friendlyMessage(e))),
+        );
       }
     } finally {
       if (mounted) setState(() => _isPlacing = false);
@@ -79,7 +95,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(t.checkout)),
-      body: ListView(
+      body: Form(
+        key: _formKey,
+        child: ListView(
         padding: const EdgeInsets.all(AppSpacing.marginMobile),
         children: [
           Card(
@@ -95,6 +113,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     controller: _addressController,
                     prefixIcon: Icons.location_on_outlined,
                     maxLines: 2,
+                    validator: Validators.address,
                   ),
                 ],
               ),
@@ -212,6 +231,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: AppSpacing.stackLg),
           PrimaryButton(label: t.placeOrder, onPressed: _placeOrder, isLoading: _isPlacing),
         ],
+        ),
       ),
     );
   }

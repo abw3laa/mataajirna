@@ -17,6 +17,7 @@ class Order extends Equatable {
     required this.total,
     required this.status,
     required this.createdAt,
+    this.address,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class Order extends Equatable {
   final double total;
   final OrderStatus status;
   final DateTime createdAt;
+  final String? address;
 
   Order copyWith({OrderStatus? status}) => Order(
         id: id,
@@ -35,6 +37,7 @@ class Order extends Equatable {
         total: total,
         status: status ?? this.status,
         createdAt: createdAt,
+        address: address,
       );
 
   @override

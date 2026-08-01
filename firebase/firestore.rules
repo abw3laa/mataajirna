@@ -67,16 +67,27 @@ service cloud.firestore {
     }
 
     // ---------------- الطلبات ----------------
-    // المستخدم: يُنشئ طلباته الخاصة ويقرأها فقط (لا يعدّل الحالة).
-    // المدير: يقرأ كل الطلبات ويحدّث الحالة (ويُفضَّل عبر Cloud Function
-    // لضمان تسجيل سجل تدقيق statusHistory بدلاً من كتابة مباشرة).
+    // ⚠️ إصلاح أمني: لا يُسمح للعميل بإنشاء مستند طلب مباشرة إطلاقاً — حتى
+    // لو أرسل userId صحيحاً وstatus='pending'. السبب: لو سمحنا بذلك، يستطيع
+    // عميل معدَّل (أو طلب شبكي مُعاد توجيهه) إرسال `total`/`items` بأسعار
+    // مزوَّرة يكتبها مباشرة في قاعدة البيانات. الإنشاء الوحيد المسموح به هو
+    // عبر Cloud Function `createOrder` (Admin SDK يتجاوز هذه القاعدة عمداً)،
+    // والتي تعيد حساب كل سعر من مستندات `products` الحقيقية على الخادم.
     match /orders/{orderId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
-      allow create: if isSignedIn()
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.status == 'pending';
+      allow create: if false;
       allow update: if isAdmin(); // العميل لا يعدّل حالة الطلب مباشرة أبداً
       allow delete: if false;
+    }
+
+    // ---------------- الكوبونات ----------------
+    // لا قراءة للعميل إطلاقاً — لو كانت المجموعة قابلة للقراءة العامة
+    // لاستطاع أي شخص سرد كل أكواد الخصم الفعّالة دون كتابتها بنفسه. التحقق
+    // من الكود وتطبيق الخصم يتم بالكامل داخل createOrder على الخادم؛ العميل
+    // يرسل فقط النص الذي كتبه ولا يعرف صحته أو قيمته مسبقاً.
+    match /coupons/{code} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
 
     // ---------------- الإشعارات ----------------

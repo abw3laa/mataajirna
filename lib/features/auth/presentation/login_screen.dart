@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/config/developer_info.dart';
 import '../../../core/storage/remember_me_store.dart';
+import '../../../core/utils/app_exception.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -26,6 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _rememberMe = true;
   String? _error;
+  bool _errorIsInfo = false;
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -49,7 +51,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // إن لم يوجد مسار عودة، يتولى go_router redirect التوجيه تلقائياً
       // (رئيسية للمستخدم العادي، لوحة التحكم للمدير).
     } catch (e) {
-      setState(() => _error = 'تعذّر تسجيل الدخول، تحقق من البيانات وحاول مجدداً');
+      setState(() {
+        _error = AppException.friendlyMessage(e);
+        _errorIsInfo = AppException.isInformational(e);
+      });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -144,7 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.stackSm),
-                  Text(_error!, style: AppTextStyles.labelMd(color: AppColors.error)),
+                  Text(_error!, style: AppTextStyles.labelMd(color: _errorIsInfo ? AppColors.primary : AppColors.error)),
                 ],
                 const SizedBox(height: 16),
                 PrimaryButton(label: t.login, onPressed: _submit, isLoading: _isLoading),

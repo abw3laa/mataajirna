@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../../catalog/domain/product.dart';
 import '../../cart/domain/cart_item.dart';
+import '../../cart/presentation/cart_providers.dart' show kTaxRate;
 import '../domain/order.dart';
 import 'orders_repository.dart';
 
@@ -95,8 +96,20 @@ class MockOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<Order> placeOrder(
-      {required List<CartItem> items, required double total}) async {
+  Future<Order> placeOrder({required List<CartItem> items, String? couponCode, String? address}) async {
+    // نحاكي هنا سلوك الخادم الحقيقي: نحسب السعر بأنفسنا من بيانات
+    // العناصر نفسها (وليس رقماً جاهزاً من واجهة الدفع)، بما يطابق تماماً ما
+    // ستفعله Cloud Function `createOrder` عند ربط Firebase الفعلي.
+    final subtotal = items.fold<double>(0, (sum, i) => sum + i.lineTotal);
+    double discountPercent = 0;
+    if (couponCode != null && couponCode.trim().isNotEmpty) {
+      const mockCoupons = {'SAVE10': 10.0, 'SAVE20': 20.0, 'WELCOME15': 15.0};
+      discountPercent = mockCoupons[couponCode.trim().toUpperCase()] ?? 0;
+    }
+    final discount = subtotal * (discountPercent / 100);
+    final taxable = subtotal - discount;
+    final total = taxable + (taxable * kTaxRate);
+
     final order = Order(
       id: 'ORD-${DateTime.now().millisecondsSinceEpoch % 100000}',
       customerName: 'أحمد عبدالله',
@@ -105,6 +118,7 @@ class MockOrdersRepository implements OrdersRepository {
       total: total,
       status: OrderStatus.pending,
       createdAt: DateTime.now(),
+      address: address,
     );
     _orders.insert(0, order);
     _emit();

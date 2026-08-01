@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/secondary_button.dart';
@@ -84,9 +85,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       label: t.productName,
                       hint: t.productNameHint,
                       controller: _nameController,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'هذا الحقل مطلوب'
-                          : null,
+                      validator: Validators.name,
                     ),
                     const SizedBox(height: AppSpacing.stackLg),
                     AppTextField(
@@ -94,6 +93,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       hint: t.productDescriptionHint,
                       controller: _descController,
                       maxLines: 4,
+                      validator: Validators.description,
                     ),
                     const SizedBox(height: AppSpacing.stackLg),
                     Align(
@@ -198,10 +198,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       hint: '0.00',
                       controller: _priceController,
                       keyboardType: TextInputType.number,
-                      validator: (v) =>
-                          (v == null || double.tryParse(v) == null)
-                              ? 'أدخل رقماً صحيحاً'
-                              : null,
+                      validator: Validators.price,
                     ),
                     const SizedBox(height: AppSpacing.stackLg),
                     AppTextField(
@@ -209,6 +206,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       hint: '0',
                       controller: _discountController,
                       keyboardType: TextInputType.number,
+                      validator: Validators.discountPercent,
                     ),
                   ],
                 ),
@@ -254,8 +252,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             Product(
               id: widget.productId ??
                   DateTime.now().millisecondsSinceEpoch.toString(),
-              name: _nameController.text,
-              description: _descController.text,
+              name: Validators.sanitize(_nameController.text),
+              description: Validators.sanitize(_descController.text),
               price: price,
               discountPrice: discountPrice,
               categoryId: _categoryId ?? 'electronics',

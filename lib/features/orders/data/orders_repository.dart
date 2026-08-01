@@ -10,7 +10,11 @@ abstract class OrdersRepository {
   /// لأي مستخدم لا يحمل `role == admin` في الـ ID Token.
   Stream<List<Order>> watchAllOrders();
 
-  Future<Order> placeOrder({required List<CartItem> items, required double total});
+  /// ⚠️ لاحظ أن هذا لا يستقبل `total` من العميل إطلاقاً. الخادم (Cloud
+  /// Function `createOrder`) هو من يعيد حساب كل سعر من مستندات `products`
+  /// الحقيقية، ويتحقق من صلاحية `couponCode` بنفسه، ثم يكتب الطلب. هذا يمنع
+  /// أي تلاعب بالسعر عبر تعديل الطلب الشبكي من العميل.
+  Future<Order> placeOrder({required List<CartItem> items, String? couponCode, String? address});
 
   /// تحديث حالة الطلب — عملية إدارية حساسة، يجب أن تمر عبر Cloud Function
   /// `updateOrderStatus` التي تتحقق من صلاحية admin قبل الكتابة.
