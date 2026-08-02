@@ -71,8 +71,6 @@ jobs:
     name: بناء تطبيق أندرويد (APK)
     runs-on: ubuntu-latest
     needs: analyze
-    permissions:
-      contents: write # مطلوبة لدفع مجلد android المولَّد تلقائياً إلى المستودع
     steps:
       - name: استنساخ المستودع
         uses: actions/checkout@v4
@@ -95,84 +93,6 @@ jobs:
 
       - name: توليد ملفات الترجمة (l10n)
         run: flutter gen-l10n
-
-      # نولّد مجلد android رسمياً عبر أداة Flutter نفسها (بدل الاحتفاظ بنسخة
-      # يدوية في المستودع) لضمان توافقه التام مع نسخة Flutter/Gradle/AGP
-      # المستخدمة في هذا الـ Runner بالتحديد، ثم نخصّصه بإعداداتنا.
-      - name: توليد مجلد Android عبر Flutter
-        run: flutter create --platforms=android --org com.matajirna .
-
-      # ⚠️ السبب الجذري لمشاكل minSdk المتكررة سابقاً: flutter create لهذه
-      # النسخة يُنشئ نسختي Groovy وKotlin DSL معاً (settings.gradle +
-      # settings.gradle.kts، وbuild.gradle + build.gradle.kts)، وGradle
-      # يُفضّل تلقائياً نسخة Groovy غير المعدَّلة عند وجود الاثنتين معاً
-      # ("Both settings.gradle and settings.gradle.kts exist... ignored")
-      # فتُتجاهل كل تعديلاتنا على .kts بصمت! الحل: حذف نسخ Groovy فوراً بعد
-      # كل توليد، قبل أي تخصيص لاحق — يجب تكرار هذا في كل تشغيل لأن
-      # flutter create يُعيد إنشاءها من جديد إن كانت غائبة.
-      - name: حذف نسخ Gradle المكررة (Groovy) والإبقاء على Kotlin DSL فقط
-        run: |
-          rm -f android/settings.gradle android/build.gradle android/app/build.gradle
-          echo "الملفات المتبقية:"
-          find android -maxdepth 1 -name "settings.gradle*" -o -maxdepth 1 -name "build.gradle*"
-          find android/app -maxdepth 1 -name "build.gradle*"
-
-      - name: تخصيص إعدادات Android (minSdk 30 لأندرويد 11+، اسم التطبيق بالعربية، Firebase)
-        run: |
-          set -e
-
-          GRADLE_FILE=android/app/build.gradle.kts
-          if [ ! -f "$GRADLE_FILE" ]; then
-            GRADLE_FILE=android/app/build.gradle
-          fi
-
-          # نحذف أي سطر يضبط الحد الأدنى لإصدار أندرويد، بأي صيغة كانت:
-          #   - الصيغة الحديثة (property-style):  minSdk = flutter.minSdkVersion
-          #   - الصيغة القديمة (function-call):    minSdkVersion 21
-          # هذا يمنع بقاء سطرين متعارضين حيث يفوز السطر الأخير في ترتيب
-          # التنفيذ (وهو بالضبط ما كان يُسقط قيمتنا 30 لصالح القيمة الافتراضية).
-          sed -i -E '/^[[:space:]]*minSdk([[:space:]]*=|Version[[:space:]])/d' "$GRADLE_FILE"
-          sed -i '/defaultConfig {/a\        minSdk = 30' "$GRADLE_FILE"
-
-          # تفعيل Firebase: تطبيق Gradle plugin الخاص بـ google-services في
-          # كل من settings.gradle.kts (تسجيل الإصدار) وapp/build.gradle.kts
-          # (تطبيقه فعلياً) — google-services.json نفسه مرفوع في المستودع.
-          sed -i '/id("dev.flutter.flutter-plugin-loader")/a\    id("com.google.gms.google-services") version "4.4.2" apply false' android/settings.gradle.kts
-          sed -i '/id("com.android.application")/a\    id("com.google.gms.google-services")' "$GRADLE_FILE"
-
-          echo "== $GRADLE_FILE =="
-          cat "$GRADLE_FILE"
-
-          sed -i 's/android:label="[^"]*"/android:label="متجرنا"/' android/app/src/main/AndroidManifest.xml
-          echo "== AndroidManifest.xml =="
-          cat android/app/src/main/AndroidManifest.xml
-
-      # لا نملك Flutter SDK محلياً لتشغيل flutter create، لذا يتولى CI توليد
-      # مجلد android وتخصيصه (الخطوتان أعلاه)، ثم يدفعه هنا تلقائياً إلى
-      # المستودع باستخدام صلاحيات GITHUB_TOKEN المدمجة — لا حاجة لأي سرّ
-      # إضافي. [skip ci] في رسالة الـ commit يمنع تشغيل الـ workflow من جديد
-      # على هذه الدفعة نفسها (تفادي حلقة لا نهائية).
-      - name: رفع مجلد android المولَّد إلى المستودع
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add android
-          if git diff --cached --quiet; then
-            echo "لا تغييرات في android/ — تخطي الرفع."
-          else
-            git commit -m "chore: تحديث مجلد android المولَّد تلقائياً عبر flutter create [skip ci]"
-            # دفع مباشر (fast-forward متوقَّع لأننا بدأنا من رأس main نفسه في
-            # هذا التشغيل). لا نستخدم pull --rebase لأن الاستنساخ ضحل
-            # (fetch-depth: 1 افتراضياً) وقد يسبب مشاكل مع rebase. إن فشل
-            # الدفع بسبب سباق نادر مع دفعة أخرى متزامنة، نكتفي بتسجيل ذلك
-            # دون إفشال الـ workflow بالكامل — نسخة android/ من آخر تشغيل
-            # ناجح تبقى موجودة في المستودع على أي حال.
-            git push origin HEAD:main || echo "⚠️ تعذّر دفع مجلد android (على الأرجح تعديل متزامن) — تجاهل غير حرج."
-          fi
-
-      # ✅ google-services.json مرفوع مباشرة في المستودع (android/app/) —
-      # لا حاجة لسرّ GitHub منفصل. بما أنه ليس جزءاً من قالب flutter create،
-      # يبقى محفوظاً دون مساس عبر كل عمليات إعادة التوليد أعلاه.
 
       - name: بناء APK (وضع Release، بتوقيع debug مؤقت)
         run: flutter build apk --release
