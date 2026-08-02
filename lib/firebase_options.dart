@@ -1,11 +1,10 @@
-// ⚠️ هذا ملف بديل مؤقت (placeholder) فقط، لضمان أن المشروع يبني بنجاح حتى
-// قبل ربط Firebase الفعلي (طالما kUseFirebase = false في backend_config.dart،
-// فلن تُستدعى هذه القيم فعلياً في أي حال).
+// خيارات Firebase الحقيقية لمشروع "matjarna-9" — مُستخرجة مباشرة من
+// android/app/google-services.json (وليست قيماً بديلة/placeholder).
 //
-// عند تنفيذ خطوات "الربط الفعلي بـ Firebase" في README.md، شغّل:
-//   flutterfire configure
-// وسيقوم بالكتابة فوق هذا الملف تلقائياً بالقيم الحقيقية لمشروعك على Firebase
-// (apiKey, appId, projectId...). لا تُعدّل هذا الملف يدوياً بعد ذلك.
+// هذه القيم هي معرّفات عميل عامة (Client-side identifiers) مصمَّمة لتكون
+// مضمَّنة داخل تطبيقات الجوال أصلاً — الحماية الفعلية تأتي من Firestore/
+// Storage Security Rules وقيد اسم حزمة أندرويد (package name)، وليس من
+// إخفاء هذه القيم. راجع firebase/firestore.rules وfirebase/storage.rules.
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
@@ -15,7 +14,7 @@ class DefaultFirebaseOptions {
     if (kIsWeb) {
       throw UnsupportedError(
         'DefaultFirebaseOptions لم تُهيَّأ لمنصة الويب بعد. '
-        'شغّل flutterfire configure لتوليد القيم الحقيقية.',
+        'شغّل flutterfire configure لتوليد القيم الحقيقية لها.',
       );
     }
     switch (defaultTargetPlatform) {
@@ -24,17 +23,16 @@ class DefaultFirebaseOptions {
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions لم تُهيَّأ لهذه المنصة بعد. '
-          'شغّل flutterfire configure لتوليد القيم الحقيقية.',
+          'شغّل flutterfire configure لتوليد القيم الحقيقية لها.',
         );
     }
   }
 
-  // قيم بديلة (placeholder) فقط — استبدلها flutterfire configure تلقائياً.
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: 'REPLACE_ME',
-    messagingSenderId: 'REPLACE_ME',
-    projectId: 'REPLACE_ME',
-    storageBucket: 'REPLACE_ME',
+    apiKey: 'AIzaSyDbacQMexyXNbe38uFnsOupDkS7w78-Fkk',
+    appId: '1:265784029182:android:16ab4ee7aa6b7f6d77daaf',
+    messagingSenderId: '265784029182',
+    projectId: 'matjarna-9',
+    storageBucket: 'matjarna-9.firebasestorage.app',
   );
 }

@@ -81,11 +81,37 @@ firebase/
   functions/       Cloud Functions (setUserRole, updateOrderStatus, onOrderCreated)
 ```
 
-## الانتقال من Mock إلى Firebase الحقيقي
+## حالة Firebase الحالية: مفعَّل ✅ (مشروع matjarna-9)
+
+`kUseFirebase = true` الآن في `lib/core/config/backend_config.dart`، ومربوط بمشروع
+Firebase حقيقي (`matjarna-9`) عبر `android/app/google-services.json` (مرفوع في المستودع)
+و`lib/firebase_options.dart` (قيم حقيقية، ليست placeholder). الكتالوج، المصادقة، والطلبات
+تستخدم Firestore/Auth الحقيقيين. **المفضلة، التقييمات، البانرات، والإشعارات لا تزال محلية
+(Mock)** — لم تُربط بعد بمستودعات Firestore حقيقية (خطوة تالية قابلة للتنفيذ لاحقاً بنفس نمط
+الكتالوج/الطلبات).
+
+⚠️ **قبل أن يعمل التطبيق فعلياً** (البناء سينجح دوماً، لكن الشاشات ستعرض أخطاء اتصال بدون
+هذه الخطوات في [Firebase Console](https://console.firebase.google.com) لمشروع `matjarna-9`):
+
+1. **Authentication** → فعّل مزوّد Email/Password.
+2. **Firestore Database** → أنشئها إن لم تكن موجودة (وضع Production).
+3. **انشر القواعد**: `firebase deploy --only firestore:rules,storage` (تتطلب `firebase login` وربط المشروع محلياً بـ `firebase use matjarna-9`).
+4. **انشر الدوال**: داخل `firebase/functions`: `npm install` ثم من الجذر `firebase deploy --only functions`.
+5. **عيّن أول مدير يدوياً** (Cloud Function `setUserRole` تتطلب مديراً موجوداً مسبقاً لاستدعائها):
+   ```bash
+   node -e "
+   const admin = require('firebase-admin');
+   admin.initializeApp();
+   admin.auth().setCustomUserClaims('UID_المستخدم_هنا', { role: 'admin' })
+     .then(() => console.log('تم'));
+   "
+   ```
+   (احصل على UID من Firebase Console → Authentication → Users، بعد أن يسجّل ذلك المستخدم حساباً عادياً أولاً من التطبيق).
+
+## خطوات الربط الفعلي (مرجع كامل — أُنجزت بالفعل لمشروع matjarna-9)
 
 المشروع الآن به **مفتاح تبديل واحد**: `lib/core/config/backend_config.dart` → `kUseFirebase`.
-طالما هو `false` (الوضع الافتراضي) يعمل التطبيق ببيانات وهمية بدون أي إعداد. اتبع هذه
-الخطوات بالترتيب، ثم غيّره إلى `true`:
+اتبع هذه الخطوات إن ربطت مشروع Firebase مختلفاً مستقبلاً:
 
 1. **أنشئ مشروع Firebase**: اذهب إلى https://console.firebase.google.com → Add project.
 2. **فعّل الخدمات المطلوبة** من القائمة الجانبية: Authentication (فعّل مزوّد Email/Password) → Firestore Database (ابدأ في وضع Production) → Storage.

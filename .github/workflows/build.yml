@@ -102,7 +102,22 @@ jobs:
       - name: توليد مجلد Android عبر Flutter
         run: flutter create --platforms=android --org com.matajirna .
 
-      - name: تخصيص إعدادات Android (minSdk 30 لأندرويد 11+، اسم التطبيق بالعربية)
+      # ⚠️ السبب الجذري لمشاكل minSdk المتكررة سابقاً: flutter create لهذه
+      # النسخة يُنشئ نسختي Groovy وKotlin DSL معاً (settings.gradle +
+      # settings.gradle.kts، وbuild.gradle + build.gradle.kts)، وGradle
+      # يُفضّل تلقائياً نسخة Groovy غير المعدَّلة عند وجود الاثنتين معاً
+      # ("Both settings.gradle and settings.gradle.kts exist... ignored")
+      # فتُتجاهل كل تعديلاتنا على .kts بصمت! الحل: حذف نسخ Groovy فوراً بعد
+      # كل توليد، قبل أي تخصيص لاحق — يجب تكرار هذا في كل تشغيل لأن
+      # flutter create يُعيد إنشاءها من جديد إن كانت غائبة.
+      - name: حذف نسخ Gradle المكررة (Groovy) والإبقاء على Kotlin DSL فقط
+        run: |
+          rm -f android/settings.gradle android/build.gradle android/app/build.gradle
+          echo "الملفات المتبقية:"
+          find android -maxdepth 1 -name "settings.gradle*" -o -maxdepth 1 -name "build.gradle*"
+          find android/app -maxdepth 1 -name "build.gradle*"
+
+      - name: تخصيص إعدادات Android (minSdk 30 لأندرويد 11+، اسم التطبيق بالعربية، Firebase)
         run: |
           set -e
 
@@ -118,6 +133,12 @@ jobs:
           # التنفيذ (وهو بالضبط ما كان يُسقط قيمتنا 30 لصالح القيمة الافتراضية).
           sed -i -E '/^[[:space:]]*minSdk([[:space:]]*=|Version[[:space:]])/d' "$GRADLE_FILE"
           sed -i '/defaultConfig {/a\        minSdk = 30' "$GRADLE_FILE"
+
+          # تفعيل Firebase: تطبيق Gradle plugin الخاص بـ google-services في
+          # كل من settings.gradle.kts (تسجيل الإصدار) وapp/build.gradle.kts
+          # (تطبيقه فعلياً) — google-services.json نفسه مرفوع في المستودع.
+          sed -i '/id("dev.flutter.flutter-plugin-loader")/a\    id("com.google.gms.google-services") version "4.4.2" apply false' android/settings.gradle.kts
+          sed -i '/id("com.android.application")/a\    id("com.google.gms.google-services")' "$GRADLE_FILE"
 
           echo "== $GRADLE_FILE =="
           cat "$GRADLE_FILE"
@@ -149,10 +170,9 @@ jobs:
             git push origin HEAD:main || echo "⚠️ تعذّر دفع مجلد android (على الأرجح تعديل متزامن) — تجاهل غير حرج."
           fi
 
-      # ⚠️ ملاحظة: إن ربطت Firebase لاحقاً، يجب رفع google-services.json كسرّ
-      # (Secret) في المستودع وكتابته هنا قبل خطوة البناء، مثال:
-      # - name: كتابة google-services.json من الأسرار
-      #   run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
+      # ✅ google-services.json مرفوع مباشرة في المستودع (android/app/) —
+      # لا حاجة لسرّ GitHub منفصل. بما أنه ليس جزءاً من قالب flutter create،
+      # يبقى محفوظاً دون مساس عبر كل عمليات إعادة التوليد أعلاه.
 
       - name: بناء APK (وضع Release، بتوقيع debug مؤقت)
         run: flutter build apk --release

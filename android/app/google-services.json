@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "265784029182",
+    "project_id": "matjarna-9",
+    "storage_bucket": "matjarna-9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265784029182:android:16ab4ee7aa6b7f6d77daaf",
+        "android_client_info": {
+          "package_name": "com.matajirna.mataajirna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbacQMexyXNbe38uFnsOupDkS7w78-Fkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
