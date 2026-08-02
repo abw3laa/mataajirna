@@ -29,7 +29,7 @@ class ManageBannersScreen extends ConsumerWidget {
       body: bannersAsync.when(
         data: (banners) {
           if (banners.isEmpty) {
-            return EmptyView(
+            return const EmptyView(
               title: 'لا توجد بانرات بعد',
               subtitle: 'أضف بانراً ليظهر في الصفحة الرئيسية للمستخدمين',
               icon: Icons.campaign_outlined,

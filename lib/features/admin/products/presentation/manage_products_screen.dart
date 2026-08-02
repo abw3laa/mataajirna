@@ -99,7 +99,7 @@ class _ManageProductsScreenState extends ConsumerState<ManageProductsScreen> {
                   onRetry: _loadFirstPage,
                 )
               : _products.isEmpty
-                  ? EmptyView(title: 'لا توجد منتجات', icon: Icons.inventory_2_outlined)
+                  ? const EmptyView(title: 'لا توجد منتجات', icon: Icons.inventory_2_outlined)
                   : RefreshIndicator(
                       onRefresh: _loadFirstPage,
                       child: ListView.separated(
